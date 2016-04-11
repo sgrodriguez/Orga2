@@ -16,9 +16,9 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 		    subtabla2->entradas[i] = NULL;
 		    i = i +1;
 		}
-		subtabla->entradas[clave[0]] = subtabla2;
+		tabla->primera->entradas[clave[0]] = subtabla2;
 		struct tdtN3_t* subtabla3 = malloc(sizeof(struct tdtN3_t));//Ahora debo crear mi ultima tabla y poner ahi mi valor! con0
-		subtabla2->entradas[clave[1]] = subtabla3;
+		
 		i = 0;
 		int f=0;
 		while(i<256){
@@ -35,7 +35,8 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 		while(f < 15) {
 			    subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
 			    f= f+1;
-		}	
+		}
+		tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;	
 	}else{
 		if(tabla->primera->entradas[clave[0]] == NULL){
 			struct tdtN2_t* subtabla2 = malloc(sizeof(struct tdtN2_t));
@@ -46,7 +47,7 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 			}
 			tabla->primera->entradas[clave[0]] = subtabla2;
 			struct tdtN3_t* subtabla3 = malloc(sizeof(struct tdtN3_t));//Ahora debo crear mi ultima tabla y poner ahi mi valor! con0
-			subtabla2->entradas[clave[1]] = subtabla3;
+			
 			i = 0;
 			int f=0;
 			while(i<256){
@@ -63,11 +64,11 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 			while(f < 15) {
 				    subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
 				    f= f+1;
-			}	
+			}
+			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;	
 		}else{//EXISTE MI PRIMERA TABLA AHORA VEAMOS 
 			if(tabla->primera->entradas[clave[0]]->entradas[clave[1]] == NULL){//no existe la tabla 3
 				struct tdtN3_t* subtabla3 = malloc(sizeof(struct tdtN3_t));//Ahora debo crear mi ultima tabla y poner ahi mi valor! con0
-				tabla->primera->entradas[clave[0]]->entradas[clave[1]]= subtabla3;
 				int i = 0;
 				int f=0;
 				while(i<256){
@@ -84,7 +85,8 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 				while(f < 15) {
 					subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
 					 f= f+1;
-				}	
+				}
+				tabla->primera->entradas[clave[0]]->entradas[clave[1]]= subtabla3;	
 			}else{//EXISTE LA TABLA 3
 				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido == 1){
 					printf("QUE HACES PAPA SETEANDO UN VALOR EXISTENTE DENUNCIADO DESPEDITE DE TU TDT\n");
@@ -100,13 +102,13 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 		}		
 	}
 
-		int f = 0;
+		/*int f = 0;
 		while(f < 15) {
 			uint8_t pepe =tabla->primera->entradas[1]->entradas[2]->entradas[3].valor.val[f];
 			f= f+1;
 			printf("TOMA IMPRIMI %u\n", pepe);
 		}
-	
+		*/
 	tabla->cantidad = tabla->cantidad +1; 
 }
 
