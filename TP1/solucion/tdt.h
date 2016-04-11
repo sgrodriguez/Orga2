@@ -14,8 +14,8 @@ typedef struct clave_t {
 } __attribute__((__packed__)) clave;
 
 typedef struct valorValido_t {
-  struct valor_t valor;
-  uint8_t valido;
+  struct valor_t valor; //30B
+  uint8_t valido; //
 } __attribute__((__packed__)) valorValido;
 
 typedef struct tdtN3_t {
