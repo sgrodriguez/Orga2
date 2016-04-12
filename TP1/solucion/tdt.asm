@@ -25,7 +25,11 @@
   %define TDT_SIZE                   20
   NULL        EQU                     0
   %define TDT_OFFSET_PUNTERO          8
-  %define TDT_SIZE_TABLA            2048
+  %define TDT_SIZE_TABLA           2048
+  %define SIZE_ARREGLO1               1
+  %define SIZE_ARREGLO2               2
+  %define TDT_12SIZE_TN3              8
+  %define BLOQUE_VALOR                3
 
 
 
@@ -71,6 +75,36 @@ tdt_crear:
 ; =====================================
 ; void tdt_recrear(tdt** tabla, char* identificacion)
 tdt_recrear:
+  
+    PUSH RBP
+    MOV  RBP, RSP
+    PUSH R12
+    PUSH RBX
+    
+    XOR R12,R12
+    XOR RBX,RBX
+    MOV R12, RSI;ME GUARDO MI PUNTERO A CARACTER
+    CMP RSI, NULL
+    JE .copiarAnterior
+    CALL tdt_destruir
+    MOV RDI,R12
+    CALL tdt_crear
+    JMP .fin
+    .copiarAnterior:
+    MOV RBX, RDI
+    MOV RDI, [RDI]
+    MOV RDI, [RDI+TDT_OFFSET_IDENTIFICACION]
+    CALL tdt_crear
+    MOV RDI, RBX
+    CALL tdt_destruir
+    JMP .fin
+
+    .fin:
+
+    POP RBX
+    POP R12
+    POP RBP
+    RET
 
 ; =====================================
 ; uint32_t tdt_cantidad(tdt* tabla)
@@ -82,15 +116,41 @@ tdt_cantidad:
 ; =====================================
 ; void tdt_agregarBloque(tdt* tabla, bloque* b)
 tdt_agregarBloque:
+  PUSH RBP
+  MOV RBP,RSP
+ 
+  MOV RDX,[RDI+BLOQUE_VALOR]
+  CALL tdt_agregar 
 
+  POP RBP
+  RET
 ; =====================================
 ; void tdt_agregarBloques(tdt* tabla, bloque** b)
 tdt_agregarBloques:
-        
+  PUSH RBP
+  MOV RBP,RSP
+  PUSH R12
+  PUSH R13
+  
+
+  MOV R12,RDI
+  MOV R13,RSI
+  
+   
+  
+  POP R13
+  POP R12
+  POP RBP
+  RET    
+
 ; =====================================
 ; void tdt_borrarBloque(tdt* tabla, bloque* b)
 tdt_borrarBloque:
-        
+  PUSH RBP
+  MOV RBP,RSP
+  CALL tdt_borrar 
+  POP RBP
+  RET    
 ; =====================================
 ; void tdt_borrarBloques(tdt* tabla, bloque** b)
 tdt_borrarBloques:
@@ -98,23 +158,74 @@ tdt_borrarBloques:
 ; =====================================
 ; void tdt_traducir(tdt* tabla, uint8_t* clave, uint8_t* valor)
 tdt_traducir:
-    PUSH RBP
+    PUSH RBP ;ALINIADO
     MOV  RBP, RSP
-    PUSH R12
-    PUSH RBX
-    
-    XOR R12,R12
-    XOR RBX,RBX
-    MOV R12, RDI;ME GUARDO MI PUNTERO A CARACTER
+    PUSH R12;DesalineadO
+    PUSH R13;ALINIADO
+    PUSH R14;DesalineadO
+    PUSH R15
 
-    POP RBX
+    XOR R8,R8
+    XOR RAX,RAX
+    XOR R12,R12
+    XOR R13,R13
+    XOR R14,R14
+    MOV R12, RDI;ME GUARDO MI PUNTERO A tabla
+    MOV R13, RSI;ME GUARDO MI PUNTERO A CLAVE
+    MOV R14, RDX;ME GUARDO MI PUNTERO A VALOR
+
+    CMP qword [R12+TDT_OFFSET_PRIMERA], NULL
+    JE .termine
+    MOV R10,[R12+TDT_OFFSET_PRIMERA]
+    MOV AL,[R13]
+    CMP qword [R10+RAX*TDT_OFFSET_PUNTERO], NULL
+    JE .termine
+    INC R13
+    MOV AL,[R13]
+    MOV R11,[R10+RAX*TDT_OFFSET_PUNTERO];Comparo segunda tabla
+    CMP qword [R11+RAx*TDT_OFFSET_PUNTERO], NULL
+    JE .termine
+    MOV RDX,[R11+RAX*TDT_OFFSET_PUNTERO]
+    INC R13
+    MOV AL,[R13]
+    SHL RAX,2
+    MOV CL,[RDX+RAX*8]
+    CMP CL ,NULL
+    JE .termine
+    ;copio el valor a mi puntero valor.
+    XOR R10,R10
+    MOV R10, NULL
+    MOV R11,[RDX+RAX*8]
+    .cicloCopiar:
+      MOV [R12],R11
+      INC R12
+      INC R11
+      MOV R11,[R11]
+      INC R10
+      CMP R10, 15
+      JE .termine
+      JMP .cicloCopiar
+
+
+  .termine:
+
+    POP R15
+    POP R14
+    POP R13
     POP R12
     POP RBP
     RET
 ; =====================================
 ; void tdt_traducirBloque(tdt* tabla, bloque* b)
 tdt_traducirBloque:
-
+  PUSH RBP
+  MOV RBP,RSP
+  
+  MOV RDX,[RSI+BLOQUE_VALOR]
+  CALL tdt_traducir 
+  
+  POP RBP
+  RET    
 ; =====================================
 ; void tdt_traducirBloques(tdt* tabla, bloque** b)
 tdt_traducirBloques:
@@ -126,7 +237,7 @@ tdt_destruir:
   
   PUSH RBP ;Aliniado
   MOV  RBP, RSP
-  SUB  RSP,24
+  SUB  RSP,24;DAD
   PUSH R12;Desalineada
   PUSH R13;Aliniado
   PUSH R14;Desalineada
@@ -206,7 +317,7 @@ tdt_destruir:
   CALL free
   MOV RDI, [R13+TDT_OFFSET_PRIMERA]
   CALL free
-  MOV RDI, [R13]
+  MOV RDI, [R12]
   CALL free
   ;MOV RAX, [RSP+24]
   ;BORRAR LA PRIMERA 
