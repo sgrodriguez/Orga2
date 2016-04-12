@@ -1,4 +1,4 @@
-#include "tdt.h"
+#include "tdt.h" // ME FALTA AGREGAR LA ULTIMA FUNCION Y ARREGLAR UN PAR DE COSITAS
 
 void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 	
@@ -88,9 +88,7 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 				}
 				tabla->primera->entradas[clave[0]]->entradas[clave[1]]= subtabla3;	
 			}else{//EXISTE LA TABLA 3
-				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido == 1){
-					printf("QUE HACES PAPA SETEANDO UN VALOR EXISTENTE DENUNCIADO DESPEDITE DE TU TDT\n");
-				}else{
+				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido != 1){
 					tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 1;
 					int f=0;
 					while(f < 15) {
@@ -101,58 +99,52 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 			}
 		}		
 	}
-
-		/*int f = 0;
-		while(f < 15) {
-			uint8_t pepe =tabla->primera->entradas[1]->entradas[2]->entradas[3].valor.val[f];
-			f= f+1;
-			printf("TOMA IMPRIMI %u\n", pepe);
-		}
-		*/
 	tabla->cantidad = tabla->cantidad +1; 
 }
 
 void tdt_borrar(tdt* tabla, uint8_t* clave) {
-	tabla->cantidad = tabla->cantidad -1;
-	int f=0;
-	while(f < 15) {
-	    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = 0;
-	    f= f+1;
-	}
-	tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 0;
-	int hayAlgo = 0;
-	int i = 0;
-	while(i < 256){
-	   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido != 0);
-	    i = i+1;
-	}
-	if(!hayAlgo){
-		//BORRAR
-		free(tabla->primera->entradas[clave[0]]->entradas[clave[1]]);
-		tabla->primera->entradas[clave[0]]->entradas[clave[1]] = NULL;
-		i = 0;
-		hayAlgo = 0;
-		while(i<256){
-			hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[i] != NULL);
-			i = i +1;
+
+	if(tabla->cantidad != 0){ 
+		tabla->cantidad = tabla->cantidad -1;
+		int f=0;
+		while(f < 15) {
+		    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = 0;
+		    f= f+1;
+		}
+		tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 0;
+		int hayAlgo = 0;
+		int i = 0;
+		while(i < 256){
+		   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido != 0);
+		    i = i+1;
 		}
 		if(!hayAlgo){
-			free(tabla->primera->entradas[clave[0]]);
-			tabla->primera->entradas[clave[0]] = NULL;
+			//BORRAR
+			free(tabla->primera->entradas[clave[0]]->entradas[clave[1]]);
+			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = NULL;
 			i = 0;
 			hayAlgo = 0;
-			while(i < 256){
-			    hayAlgo = hayAlgo || (tabla->primera->entradas[i] != NULL);
-			    i = i +1;
+			while(i<256){
+				hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[i] != NULL);
+				i = i +1;
 			}
 			if(!hayAlgo){
-				free(tabla->primera);
-				tabla->primera = NULL;
+				free(tabla->primera->entradas[clave[0]]);
+				tabla->primera->entradas[clave[0]] = NULL;
+				i = 0;
+				hayAlgo = 0;
+				while(i < 256){
+				    hayAlgo = hayAlgo || (tabla->primera->entradas[i] != NULL);
+				    i = i +1;
+				}
+				if(!hayAlgo){
+					free(tabla->primera);
+					tabla->primera = NULL;
+				}
 			}
+
 		}
-
 	}
-
 }
 
 void tdt_imprimirTraducciones(tdt* tabla, FILE* pFile) {
@@ -188,5 +180,13 @@ void tdt_imprimirTraducciones(tdt* tabla, FILE* pFile) {
 }
 
 maxmin* tdt_obtenerMaxMin(tdt* tabla) {
-  return 0;
+
+	struct maxmin* init = calloc(1,sizeof(maxmin));
+
+	
+		
+	
+
+
+  return init;
 }

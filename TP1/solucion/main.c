@@ -16,16 +16,14 @@ int main (void){
 	uint8_t valor4[15] = {3,4,5,6,7,8,4,5,63,2,3,4,5,6,5};
 	
 	tdt_agregar(tabla, clave1, valor1);
-	char *archivoCasoChico  =  "salida.caso.chico.txt";
-	FILE *pFile;
-	pFile = fopen( archivoCasoChico, "a" );
-	tdt_imprimirTraducciones(tabla, pFile);
+	
+	
 	tdt_agregar(tabla, clave2, valor2);
-	tdt_imprimirTraducciones(tabla, pFile);
+	
 	tdt_agregar(tabla, clave3, valor3);
-	tdt_imprimirTraducciones(tabla, pFile);
+	
 	tdt_agregar(tabla, clave4, valor4);
-	tdt_imprimirTraducciones(tabla, pFile);
+	
 	
 	//tdt_borrar(tabla,clave1);
 

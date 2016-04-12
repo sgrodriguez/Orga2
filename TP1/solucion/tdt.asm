@@ -1,4 +1,4 @@
-; FUNCIONES de C
+; FUNCIONES de C ////ME FALTA ARREGLAR UN PAR DE COSITAS////
   extern malloc
   extern free
   extern strcpy
@@ -28,7 +28,7 @@
   %define TDT_SIZE_TABLA           2048
   %define SIZE_ARREGLO1               1
   %define SIZE_ARREGLO2               2
-  %define TDT_12SIZE_TN3              8
+  %define TDT_SIZE_TN3                8
   %define BLOQUE_VALOR                3
 
 
@@ -119,7 +119,10 @@ tdt_agregarBloque:
   PUSH RBP
   MOV RBP,RSP
  
-  MOV RDX,[RDI+BLOQUE_VALOR]
+  MOV R10,RSI
+  ADD RSI,BLOQUE_VALOR
+  MOV RDX,RSI
+  MOV RSI,R10
   CALL tdt_agregar 
 
   POP RBP
@@ -135,9 +138,19 @@ tdt_agregarBloques:
 
   MOV R12,RDI
   MOV R13,RSI
+  MOV R14,[RSI]
+ .ciclo: 
+	  CMP qword R14,NULL
+	  JE .termine
+	  MOV RDI,R12
+	  MOV RSI,R14
+	  CALL tdt_agregarBloque
+	  ADD R14, TDT_OFFSET_PUNTERO
+	  JMP .ciclo
+
   
-   
-  
+  .termine:
+
   POP R13
   POP R12
   POP RBP
@@ -154,6 +167,32 @@ tdt_borrarBloque:
 ; =====================================
 ; void tdt_borrarBloques(tdt* tabla, bloque** b)
 tdt_borrarBloques:
+
+  PUSH RBP
+  MOV RBP,RSP
+  PUSH R12
+  PUSH R13
+  
+
+  MOV R12,RDI
+  MOV R13,RSI
+  MOV R14,[RSI]
+ .ciclo: 
+	  CMP qword R14,NULL
+	  JE .termine
+	  MOV RDI,R12
+	  MOV RSI,R14
+	  CALL tdt_borrarBloque
+	  ADD R14, TDT_OFFSET_PUNTERO
+	  JMP .ciclo
+
+  
+  .termine:
+
+  POP R13
+  POP R12
+  POP RBP
+  RET    
         
 ; =====================================
 ; void tdt_traducir(tdt* tabla, uint8_t* clave, uint8_t* valor)
@@ -229,7 +268,33 @@ tdt_traducirBloque:
 ; =====================================
 ; void tdt_traducirBloques(tdt* tabla, bloque** b)
 tdt_traducirBloques:
-        
+  
+ PUSH RBP
+  MOV RBP,RSP
+  PUSH R12
+  PUSH R13
+  
+
+  MOV R12,RDI
+  MOV R13,RSI
+  MOV R14,[RSI]
+ .ciclo: 
+	  CMP qword R14,NULL
+	  JE .termine
+	  MOV RDI,R12
+	  MOV RSI,R14
+	  CALL tdt_traducirBloque
+	  ADD R14, TDT_OFFSET_PUNTERO
+	  JMP .ciclo
+
+  
+  .termine:
+
+  POP R13
+  POP R12
+  POP RBP
+  RET    
+
 ; =====================================
 ; void tdt_destruir(tdt** tabla)
 tdt_destruir:
@@ -249,7 +314,7 @@ tdt_destruir:
   XOR R13,R13
   XOR R14,R14
 
-  ;MOV [RSP+24], RAX
+  
   MOV R12,RDI;PUNTERO A PUNTERO DE tabla
   MOV R13,[RDI]; MI TABLA
   MOV R14, [R13+TDT_OFFSET_PRIMERA]; ME GUARDO MI PRIMERA
@@ -260,8 +325,8 @@ tdt_destruir:
 
 
 .borrarTabla1:            ; tengo que loopear toda mi array y en las poss donde es diferente de null entro y repito este procedimiento
-  CMP qword [R14], NULL
-  JE .seguirTabla1
+  CMP  qword [R14], NULL
+  JE  .seguirTabla1
   JMP .borrarTabla2
 
 .seguirTabla1:
@@ -319,7 +384,7 @@ tdt_destruir:
   CALL free
   MOV RDI, [R12]
   CALL free
-  ;MOV RAX, [RSP+24]
+  
   ;BORRAR LA PRIMERA 
   ;BORRAR EL STRING
   ;BORRAR TODA LA TABLA DE TRADUCCION
