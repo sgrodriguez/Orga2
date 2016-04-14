@@ -19,5 +19,5 @@ tdt_c.o: tdt.c
 
 clean:
 	rm -f *.o
-	rm -f main tester
+	#rm -f main tester
 	rm -f salida.caso.*

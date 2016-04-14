@@ -36,7 +36,8 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 			    subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
 			    f= f+1;
 		}
-		tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;	
+		tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;
+		tabla->cantidad = tabla->cantidad +1;	
 	}else{
 		if(tabla->primera->entradas[clave[0]] == NULL){
 			struct tdtN2_t* subtabla2 = malloc(sizeof(struct tdtN2_t));
@@ -65,46 +66,68 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 				    subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
 				    f= f+1;
 			}
-			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;	
+			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = subtabla3;
+			tabla->cantidad = tabla->cantidad +1;	
 		}else{//EXISTE MI PRIMERA TABLA AHORA VEAMOS 
 			if(tabla->primera->entradas[clave[0]]->entradas[clave[1]] == NULL){//no existe la tabla 3
-				struct tdtN3_t* subtabla3 = malloc(sizeof(struct tdtN3_t));//Ahora debo crear mi ultima tabla y poner ahi mi valor! con0
-				int i = 0;
-				int f=0;
-				while(i<256){
+					struct tdtN3_t* subtabla3 = malloc(sizeof(struct tdtN3_t));//Ahora debo crear mi ultima tabla y poner ahi mi valor! con0
+					int i = 0;
+					int f=0;
+					while(i<256){
+						f = 0;
+						while(f < 15) {
+						    subtabla3->entradas[i].valor.val[f] = 0;
+						    f= f+1;
+						}
+						subtabla3->entradas[i].valido = 0;
+						i=i+1;
+					}
+					//Seteo mi valor
+					subtabla3->entradas[clave[2]].valido = 1;
 					f = 0;
 					while(f < 15) {
-					    subtabla3->entradas[i].valor.val[f] = 0;
-					    f= f+1;
+						subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
+						 f= f+1;
 					}
-					subtabla3->entradas[i].valido = 0;
-					i=i+1;
-				}
-				subtabla3->entradas[clave[2]].valido = 1;
-				f = 0;
-				while(f < 15) {
-					subtabla3->entradas[clave[2]].valor.val[f] = valor[f];
-					 f= f+1;
-				}
-				tabla->primera->entradas[clave[0]]->entradas[clave[1]]= subtabla3;	
+					
+					tabla->primera->entradas[clave[0]]->entradas[clave[1]]= subtabla3;
+					tabla->cantidad = tabla->cantidad +1;
+
 			}else{//EXISTE LA TABLA 3
-				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido != 1){
-					tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 1;
-					int f=0;
-					while(f < 15) {
-				    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = valor[f];
-				    f= f+1;
-					}	
-				}
+
+				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido == 1){
+						
+						printf("QUE HACES PAPA SETEANDO UN VALOR EXISTENTE DENUNCIADO DESPEDITE DE TU TDT\n");
+						int f=0;
+						while(f < 15) {
+						    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = valor[f];
+						    f= f+1;
+						}
+
+					}else{
+
+						tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 1;
+						int f=0;
+						while(f < 15) {
+					    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = valor[f];
+					    f= f+1;
+						}
+
+						tabla->cantidad = tabla->cantidad +1; 	
+					}
 			}
 		}		
 	}
-	tabla->cantidad = tabla->cantidad +1; 
+	 
 }
 
 void tdt_borrar(tdt* tabla, uint8_t* clave) {
 
-	if(tabla->cantidad != 0){ 
+	if(tabla->primera != NULL){
+		if(tabla->primera->entradas[clave[0]] != NULL){
+
+	if (tabla->primera->entradas[clave[0]]->entradas[clave[1]] !=NULL){
+		
 		tabla->cantidad = tabla->cantidad -1;
 		int f=0;
 		while(f < 15) {
@@ -115,10 +138,10 @@ void tdt_borrar(tdt* tabla, uint8_t* clave) {
 		int hayAlgo = 0;
 		int i = 0;
 		while(i < 256){
-		   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido != 0);
+		   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido == 1);
 		    i = i+1;
 		}
-		if(!hayAlgo){
+		if(hayAlgo==0){
 			//BORRAR
 			free(tabla->primera->entradas[clave[0]]->entradas[clave[1]]);
 			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = NULL;
@@ -128,7 +151,7 @@ void tdt_borrar(tdt* tabla, uint8_t* clave) {
 				hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[i] != NULL);
 				i = i +1;
 			}
-			if(!hayAlgo){
+			if(hayAlgo==0){
 				free(tabla->primera->entradas[clave[0]]);
 				tabla->primera->entradas[clave[0]] = NULL;
 				i = 0;
@@ -144,7 +167,18 @@ void tdt_borrar(tdt* tabla, uint8_t* clave) {
 			}
 
 		}
+
+	}else{
+		printf("Estas Borrando ALGo que no existe\n");
 	}
+
+}else{
+	printf("Estas Borrando ALGo que no existe\n");
+}	
+	}else{
+		printf("Estas Borrando ALGo que no existe\n");
+	}
+	
 }
 
 void tdt_imprimirTraducciones(tdt* tabla, FILE* pFile) {

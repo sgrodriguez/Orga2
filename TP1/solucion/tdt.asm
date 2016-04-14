@@ -25,7 +25,7 @@
   %define TDT_SIZE                   20
   NULL        EQU                     0
   %define TDT_OFFSET_PUNTERO          8
-  %define TDT_SIZE_TABLA           2048
+  %define TDT_SIZE_TABLA           2040
   %define SIZE_ARREGLO1               1
   %define SIZE_ARREGLO2               2
   %define TDT_SIZE_TN3                8
@@ -63,9 +63,9 @@ tdt_crear:
     MOV R12, RAX
     MOV RDI ,TDT_SIZE;LA CANTIDAD DE BYTES QUE QUIERO EN MI MALLLOC
     CALL malloc
-    MOV qword [RAX+TDT_OFFSET_IDENTIFICACION], R12;LE ASIGNO EL PUNTERO A CARACTER AL PRIMER ESPACIO DE MI MALLLOC
+    MOV [RAX+TDT_OFFSET_IDENTIFICACION], R12;LE ASIGNO EL PUNTERO A CARACTER AL PRIMER ESPACIO DE MI MALLLOC
     MOV qword [RAX+TDT_OFFSET_PRIMERA], NULL
-    MOV word  [RAX+TDT_OFFSET_CANTIDAD], NULL
+    MOV dword [RAX+TDT_OFFSET_CANTIDAD], NULL
     
     POP RBX
     POP R12
@@ -92,7 +92,6 @@ tdt_recrear:
     JMP .fin
     .copiarAnterior:
     MOV RBX, RDI
-    MOV RDI, [RDI]
     MOV RDI, [RDI+TDT_OFFSET_IDENTIFICACION]
     CALL tdt_crear
     MOV RDI, RBX
@@ -138,12 +137,12 @@ tdt_agregarBloques:
 
   MOV R12,RDI
   MOV R13,RSI
-  MOV R14,[RSI]
+  MOV R14,RSI
  .ciclo: 
-	  CMP qword R14,NULL
+	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
-	  MOV RSI,R14
+	  MOV RSI,[R14]
 	  CALL tdt_agregarBloque
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
@@ -161,7 +160,10 @@ tdt_agregarBloques:
 tdt_borrarBloque:
   PUSH RBP
   MOV RBP,RSP
+
+
   CALL tdt_borrar 
+
   POP RBP
   RET    
 ; =====================================
@@ -176,12 +178,12 @@ tdt_borrarBloques:
 
   MOV R12,RDI
   MOV R13,RSI
-  MOV R14,[RSI]
+  MOV R14,RSI
  .ciclo: 
-	  CMP qword R14,NULL
+	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
-	  MOV RSI,R14
+	  MOV RSI,[R14]
 	  CALL tdt_borrarBloque
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
@@ -277,12 +279,12 @@ tdt_traducirBloques:
 
   MOV R12,RDI
   MOV R13,RSI
-  MOV R14,[RSI]
+  MOV R14,RSI
  .ciclo: 
-	  CMP qword R14,NULL
+	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
-	  MOV RSI,R14
+	  MOV RSI,[R14]
 	  CALL tdt_traducirBloque
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
