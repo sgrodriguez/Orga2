@@ -182,7 +182,7 @@ void tdt_borrar(tdt* tabla, uint8_t* clave) {
 }
 
 void tdt_imprimirTraducciones(tdt* tabla, FILE* pFile) {
-	fprintf(pFile,"-%s-\n",tabla->identificacion);
+	fprintf(pFile,"- %s -\n",tabla->identificacion);
 	if(tabla->primera != NULL){
 		int i = 0;
 		while(i < 256) {

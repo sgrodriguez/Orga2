@@ -83,19 +83,23 @@ tdt_recrear:
     
     XOR R12,R12
     XOR RBX,RBX
+    MOV RBX, RDI;ME GUARDO MI PUNTERO A PUNTERO TABLA
     MOV R12, RSI;ME GUARDO MI PUNTERO A CARACTER
     CMP RSI, NULL
     JE .copiarAnterior
     CALL tdt_destruir
     MOV RDI,R12
     CALL tdt_crear
+    MOV RDI, RBX
+    MOV [RDI],RAX
     JMP .fin
     .copiarAnterior:
-    MOV RBX, RDI
     MOV RDI, [RDI+TDT_OFFSET_IDENTIFICACION]
     CALL tdt_crear
+    MOV R12,RAX
     MOV RDI, RBX
     CALL tdt_destruir
+    MOV [RBX],R12
     JMP .fin
 
     .fin:
@@ -204,7 +208,7 @@ tdt_traducir:
     PUSH R12;DesalineadO
     PUSH R13;ALINIADO
     PUSH R14;DesalineadO
-    PUSH R15
+    PUSH R15;Alineado
 
     XOR R8,R8
     XOR RAX,RAX
@@ -229,19 +233,18 @@ tdt_traducir:
     MOV RDX,[R11+RAX*TDT_OFFSET_PUNTERO]
     INC R13
     MOV AL,[R13]
-    SHL RAX,2
-    MOV CL,[RDX+RAX*8]
+    SHL RAX,1
+    MOV CL,[RDX+RAX*8+15]
     CMP CL ,NULL
     JE .termine
     ;copio el valor a mi puntero valor.
     XOR R10,R10
     MOV R10, NULL
-    MOV R11,[RDX+RAX*8]
+    LEA R11,[RDX+RAX*8]
     .cicloCopiar:
-      MOV [R12],R11
-      INC R12
+      MOV [R14],R11
+      INC R14
       INC R11
-      MOV R11,[R11]
       INC R10
       CMP R10, 15
       JE .termine
