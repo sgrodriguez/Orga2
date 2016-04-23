@@ -22,6 +22,20 @@ void sepia_c    (
             *p_d = *p_s;
         }
     }	//COMPLETAR
+
+    unsigned short suma;
+
+    for (int i = 0; i < filas; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            bgra_t *p_d = (bgra_t*) &dst_matrix[i][j * 4];
+            suma = bgra_t->r + bgra_t->g + bgra_t->b
+            bgra_t->r = (unsigned char) suma * 0.5
+            bgra_t->g = (unsigned char) suma * 0.3
+            bgra_t->b = (unsigned char) suma * 0.2
+        }
+    }
 }
 
 
