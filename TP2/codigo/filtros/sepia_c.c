@@ -21,12 +21,12 @@ void sepia_c    (
         {
             bgra_t *p_d = (bgra_t*) &dst_matrix[i][j * 4];
             bgra_t *p_s = (bgra_t*) &src_matrix[i][j * 4];
-            //*p_d = *p_s;
-            suma = p_s->r + p_s->g + p_s->b
-            p_d->r = (unsigned char) suma * 0.5
-            p_d->g = (unsigned char) suma * 0.3
-            p_d->b = (unsigned char) suma * 0.2
-            p_d->a = p_s->a
+            *p_d = *p_s;
+            suma = p_s->r + p_s->g + p_s->b;
+            p_d->r = (suma * 0.5 > 255) ? 255 : (suma * 0.5);
+            p_d->g = (suma * 0.3 > 255) ? 255 : (suma * 0.3);
+            p_d->b = (suma * 0.2 > 255) ? 255 : (suma * 0.2);
+            p_d->a = p_s->a;
         }
     }	//COMPLETAR
 
