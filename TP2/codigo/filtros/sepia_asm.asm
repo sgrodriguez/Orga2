@@ -34,7 +34,7 @@ sepia_asm:
 		jnz .ciclo_cols
 	;Cuanto termino de ciclar las columnas de la fila i, voy a la fila i + 1 (que comienza en [i+1]*src_row_size)
 	xor R11, R11
-	add R10, R8D
+	add R10, R8
 	dec ECX
 	jnz .ciclo_filas
 

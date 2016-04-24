@@ -36,8 +36,8 @@ void cropflip_c    (
 		j = 0;
 		while(j < tamx){ 
 	
-			bgra_t *p_d = (bgra_t*)&dst_matrix[tamy-i][(tamx-j) * 4)]; //PARA DARLOS VUELTA
-            		bgra_t *p_s = (bgra_t*)&src_matrix[offsety+i][(offsetx+j) * 4];
+			bgra_t *p_d = (bgra_t*)&dst_matrix[tamy-i][(tamx-j) * 4]; //PARA DARLOS VUELTA
+            bgra_t *p_s = (bgra_t*)&src_matrix[offsety+i][(offsetx+j) * 4];
 
 			p_d->b = p_s->b;
 			p_d->g = p_s->g;
