@@ -22,7 +22,8 @@ sepia_asm:
 	xor RAX, RAX	;Contador de columnas temporal
 
 	.ciclo_filas:
-		mov R11, R10
+		xor R11, R11
+		mov R11D, R10D
 		mov EAX, EDX
 		.ciclo_cols:
 			movdqu XMM0, [RDI + R11] ;En R11 tengo R10 (el offset de la fila en la que estoy parado) + 16 * [cantidad de paquetes de pixeles procesados]
@@ -31,12 +32,13 @@ sepia_asm:
 		;Cuando termino de trabajar con el paquete de pixeles de la posicion i, me muevo a la posicion i + 4 (que esta 16 bytes mas adelante)
 		add R11, 16
 		sub EAX, 4
-		jnz .ciclo_cols
+		cmp EAX, 0
+		jne .ciclo_cols
 	;Cuanto termino de ciclar las columnas de la fila i, voy a la fila i + 1 (que comienza en [i+1]*src_row_size)
-	xor R11, R11
-	add R10, R8
+	add R10D, R8D
 	dec ECX
-	jnz .ciclo_filas
+	cmp ECX, 0
+	jne .ciclo_filas
 
-
+	pop RBP
 	ret
