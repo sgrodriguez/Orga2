@@ -79,8 +79,42 @@ ldr_asm:
 			jle .ciclo_cols_ldr_copiado
 			
 			;==============A PARTIR DE ACA TRABAJO CON EL FILTRO LDR REALMENTE==============
-			;Traigo el paquete de pixels de source a XMM0
-			movdqu XMM0, [RDI + R11] 	; XMMO = [ a3 | r3 | g3 | b3 || a2 | r2 | g2 | b2 || a1 | r1 | g1 | b1 || a0 | r0 | g0 | b0 ]
+			;Voy a usar R12 para direccionar a las posiciones en las cuales me tengo que traer los paquetes, que son las siguientes: (s = src_row_size)
+			; | R11+2s-2 | R11+2s-1 | R11+2s+0 | R11+2s+1 || R11+2s+2 | R11+2s+3 | R11+2s+4 | R11+2s+5 | => XMM0 || XMM1
+			; | R11+1s-2 | R11+1s-1 | R11+1s+0 | R11+1s+1 || R11+1s+2 | R11+1s+3 | R11+1s+4 | R11+1s+5 | => XMM2 || XMM3
+			; | R11+0s-2 | R11+0s-1 | R11+0s+0 | R11+0s+1 || R11+0s+2 | R11+0s+3 | R11+0s+4 | R11+0s+5 | => XMM4 || XMM5
+			; | R11-1s-2 | R11-1s-1 | R11-1s+0 | R11-1s+1 || R11-1s+2 | R11-1s+3 | R11-1s+4 | R11-1s+5 | => XMM6 || XMM7
+			; | R11-2s-2 | R11-2s-1 | R11-2s+0 | R11-2s+1 || R11-2s+2 | R11-2s+3 | R11-2s+4 | R11-2s+5 | => XMM8 || XMM9
+
+			;El paquete que voy a procesar son los 4 pixeles que se encuentran a partir de R11+0s+0, con p0 y p1 en la parte mas significativa de XMM4, y p1 y p2 en la menos significativa de XMM5
+			;Toda esta informacion se trae con 10 copias a registros XMM desde memoria.
+			;Si quisiera procesar 1 pixel, deberia hacer 10 accesos a memoria de todas formas, ya que son 5 lineas de informacion (que estan separadas en memoria), 
+			;	y 5 pixels por linea de informacion, que no entran en un solo registro XMM (20 bytes, registros XMM solo pueden traer 16 bytes).
+
+			;Traigo todos los pixels que necesito para trabajar a los registros como esta especificado al comienzo de esta seccion
+			mov R12, R11
+			sub R12, 8
+			movdqu XMM4, [RDI + R12]	;R12 = R11-2
+			add R12, 16
+			movdqu XMM5, [RDI + R12]	;R12 = R11+2
+			add R12D, R8D
+			movdqu XMM3, [RDI + R12]	;R12 = R11+1s+2
+			sub R12, 16
+			movdqu XMM2, [RDI + R12]	;R12 = R11+1s-2
+			add R12D, R8D
+			movdqu XMM0, [RDI + R12]	;R12 = R11+2s-2
+			add R12, 16
+			movdqu XMM1, [RDI + R12]	;R12 = R11+2s+2
+			mov R12, R11
+			sub R12, 8
+			sub R12D, R8D
+			movdqu XMM6, [RDI + R12]	;R12 = R11-1s-2
+			add R12, 16
+			movdqu XMM7, [RDI + R12]	;R12 = R11-1s+2
+			sub R12D, R8D
+			movdqu XMM9, [RDI + R12]	;R12 = R11-2s+2
+			sub R12, 16
+			movdqu XMM8, [RDI + R12]	;R12 = R11-2s-2
 
 
 		;Cuando termino de trabajar con el paquete de pixels de la posicion i, me muevo a la posicion i + 4 (que esta 16 bytes mas adelante)
