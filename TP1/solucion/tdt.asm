@@ -217,6 +217,7 @@ tdt_traducir:
     XOR R12,R12
     XOR R13,R13
     XOR R14,R14
+    xor rcx,rcx
     MOV R12, RDI;ME GUARDO MI PUNTERO A tabla
     MOV R13, RSI;ME GUARDO MI PUNTERO A CLAVE
     MOV R14, RDX;ME GUARDO MI PUNTERO A VALOR
@@ -242,18 +243,18 @@ tdt_traducir:
     ;copio el valor a mi puntero valor.
     XOR R10,R10
     MOV R10, NULL
-    lea R11,[rcx+RAX*8]
+    lea R11,[rcx+RAX*8];tengo la direccion de mi primer valor
 
- ;.cicloCopiar:
-  ;  xor rax,rax
-  ;  mov al,[r11]
-  ;  mov [RDX],al
-  ;  inc rdx
-  ;  INC R11
-  ;  INC R10
-  ;  CMP R10, 14
-  ;  JE .termine
-  ;  JMP .cicloCopiar
+ .cicloCopiar:
+    xor rax,rax; ;uso temporalmente al para almacenar el valor
+    mov al,[r11]
+    mov [r14],al;en r14 que tengo mi puntero a uint8_t* valor pego mi valor
+    inc r14 ;
+    INC R11
+    INC R10
+    CMP R10, 15
+    JE .termine
+    ;JMP .cicloCopiar
 
 
   .termine:
