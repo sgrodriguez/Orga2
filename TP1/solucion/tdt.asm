@@ -4,7 +4,7 @@
   extern strcpy
   extern tdt_agregar
   extern tdt_borrar
-  
+
 ; FUNCIONES
   global tdt_crear
   global tdt_recrear
@@ -43,7 +43,7 @@ tdt_crear:
     MOV  RBP, RSP
     PUSH R12
     PUSH RBX
-    
+
     XOR R12,R12
     XOR RBX,RBX
     MOV R12, RDI;ME GUARDO MI PUNTERO A CARACTER
@@ -66,7 +66,7 @@ tdt_crear:
     MOV [RAX+TDT_OFFSET_IDENTIFICACION], R12;LE ASIGNO EL PUNTERO A CARACTER AL PRIMER ESPACIO DE MI MALLLOC
     MOV qword [RAX+TDT_OFFSET_PRIMERA], NULL
     MOV dword [RAX+TDT_OFFSET_CANTIDAD], NULL
-    
+
     POP RBX
     POP R12
     POP RBP
@@ -75,12 +75,12 @@ tdt_crear:
 ; =====================================
 ; void tdt_recrear(tdt** tabla, char* identificacion)
 tdt_recrear:
-  
+
     PUSH RBP
     MOV  RBP, RSP
     PUSH R12
     PUSH RBX
-    
+
     XOR R12,R12
     XOR RBX,RBX
     MOV RBX, RDI;ME GUARDO MI PUNTERO A PUNTERO TABLA
@@ -113,7 +113,7 @@ tdt_recrear:
 ; uint32_t tdt_cantidad(tdt* tabla)
 tdt_cantidad:
 
-  MOV RAX, [RDI+TDT_OFFSET_CANTIDAD]
+  MOV EAX, [RDI+TDT_OFFSET_CANTIDAD]
   RET
 
 ; =====================================
@@ -121,12 +121,12 @@ tdt_cantidad:
 tdt_agregarBloque:
   PUSH RBP
   MOV RBP,RSP
- 
+
   MOV R10,RSI
   ADD RSI,BLOQUE_VALOR
   MOV RDX,RSI
   MOV RSI,R10
-  CALL tdt_agregar 
+  CALL tdt_agregar
 
   POP RBP
   RET
@@ -137,12 +137,12 @@ tdt_agregarBloques:
   MOV RBP,RSP
   PUSH R12
   PUSH R13
-  
+
 
   MOV R12,RDI
   MOV R13,RSI
   MOV R14,RSI
- .ciclo: 
+ .ciclo:
 	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
@@ -151,13 +151,13 @@ tdt_agregarBloques:
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
 
-  
+
   .termine:
 
   POP R13
   POP R12
   POP RBP
-  RET    
+  RET
 
 ; =====================================
 ; void tdt_borrarBloque(tdt* tabla, bloque* b)
@@ -166,10 +166,10 @@ tdt_borrarBloque:
   MOV RBP,RSP
 
 
-  CALL tdt_borrar 
+  CALL tdt_borrar
 
   POP RBP
-  RET    
+  RET
 ; =====================================
 ; void tdt_borrarBloques(tdt* tabla, bloque** b)
 tdt_borrarBloques:
@@ -178,12 +178,12 @@ tdt_borrarBloques:
   MOV RBP,RSP
   PUSH R12
   PUSH R13
-  
+
 
   MOV R12,RDI
   MOV R13,RSI
   MOV R14,RSI
- .ciclo: 
+ .ciclo:
 	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
@@ -192,14 +192,14 @@ tdt_borrarBloques:
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
 
-  
+
   .termine:
 
   POP R13
   POP R12
   POP RBP
-  RET    
-        
+  RET
+
 ; =====================================
 ; void tdt_traducir(tdt* tabla, uint8_t* clave, uint8_t* valor)
 tdt_traducir:
@@ -209,6 +209,8 @@ tdt_traducir:
     PUSH R13;ALINIADO
     PUSH R14;DesalineadO
     PUSH R15;Alineado
+    PUSH rcx
+    push r8
 
     XOR R8,R8
     XOR RAX,RAX
@@ -228,62 +230,66 @@ tdt_traducir:
     INC R13
     MOV AL,[R13]
     MOV R11,[R10+RAX*TDT_OFFSET_PUNTERO];Comparo segunda tabla
-    CMP qword [R11+RAx*TDT_OFFSET_PUNTERO], NULL
+    CMP qword [R11+RAX*TDT_OFFSET_PUNTERO], NULL
     JE .termine
-    MOV RDX,[R11+RAX*TDT_OFFSET_PUNTERO]
+    MOV rcx,[R11+RAX*TDT_OFFSET_PUNTERO]
     INC R13
     MOV AL,[R13]
     SHL RAX,1
-    MOV CL,[RDX+RAX*8+15]
+    MOV CL,[rcx+RAX*8+15]
     CMP CL ,NULL
     JE .termine
     ;copio el valor a mi puntero valor.
     XOR R10,R10
     MOV R10, NULL
-    LEA R11,[RDX+RAX*8]
-    .cicloCopiar:
-      MOV [R14],R11
-      INC R14
-      INC R11
-      INC R10
-      CMP R10, 15
-      JE .termine
-      JMP .cicloCopiar
+    lea R11,[rcx+RAX*8]
+
+ ;.cicloCopiar:
+  ;  xor rax,rax
+  ;  mov al,[r11]
+  ;  mov [RDX],al
+  ;  inc rdx
+  ;  INC R11
+  ;  INC R10
+  ;  CMP R10, 14
+  ;  JE .termine
+  ;  JMP .cicloCopiar
 
 
   .termine:
-
+    pop r8
+    pop rcx
     POP R15
     POP R14
     POP R13
     POP R12
     POP RBP
     RET
-; =====================================
+ ;=====================================
 ; void tdt_traducirBloque(tdt* tabla, bloque* b)
 tdt_traducirBloque:
   PUSH RBP
   MOV RBP,RSP
-  
+
   MOV RDX,[RSI+BLOQUE_VALOR]
-  CALL tdt_traducir 
-  
+  CALL tdt_traducir
+
   POP RBP
-  RET    
+  RET
 ; =====================================
 ; void tdt_traducirBloques(tdt* tabla, bloque** b)
 tdt_traducirBloques:
-  
+
  PUSH RBP
   MOV RBP,RSP
   PUSH R12
   PUSH R13
-  
+
 
   MOV R12,RDI
   MOV R13,RSI
   MOV R14,RSI
- .ciclo: 
+ .ciclo:
 	  CMP qword [R14],NULL
 	  JE .termine
 	  MOV RDI,R12
@@ -292,19 +298,19 @@ tdt_traducirBloques:
 	  ADD R14, TDT_OFFSET_PUNTERO
 	  JMP .ciclo
 
-  
+
   .termine:
 
   POP R13
   POP R12
   POP RBP
-  RET    
+  RET
 
 ; =====================================
 ; void tdt_destruir(tdt** tabla)
 tdt_destruir:
 
-  
+
   PUSH RBP ;Aliniado
   MOV  RBP, RSP
   SUB  RSP,24;DAD
@@ -313,13 +319,13 @@ tdt_destruir:
   PUSH R14;Desalineada
   PUSH R15;Aliniado
   PUSH RBX;Desalineada
-  
-  
+
+
   XOR R12,R12
   XOR R13,R13
   XOR R14,R14
 
-  
+
   MOV R12,RDI;PUNTERO A PUNTERO DE tabla
   MOV R13,[RDI]; MI TABLA
   MOV R14, [R13+TDT_OFFSET_PRIMERA]; ME GUARDO MI PRIMERA
@@ -350,7 +356,7 @@ tdt_destruir:
   MOV [RBP-8], RDI
   MOV [RBP-16],R14
   MOV R14, [R14]
-  
+
   JMP .loopearTabla2
 
 .loopearTabla2:
@@ -382,19 +388,19 @@ tdt_destruir:
 
 
 .borrarTabla:
- 
+
   MOV RDI, [R13+TDT_OFFSET_IDENTIFICACION]
   CALL free
   MOV RDI, [R13+TDT_OFFSET_PRIMERA]
   CALL free
   MOV RDI, [R12]
   CALL free
-  
-  ;BORRAR LA PRIMERA 
+
+  ;BORRAR LA PRIMERA
   ;BORRAR EL STRING
   ;BORRAR TODA LA TABLA DE TRADUCCION
-  
-  
+
+
   POP RBX
   POP R15
   POP R14
@@ -403,5 +409,3 @@ tdt_destruir:
   ADD RSP,24
   POP RBP
   ret
-
-

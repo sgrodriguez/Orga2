@@ -43,7 +43,7 @@ typedef struct bloque_t {
 
 typedef struct maxmin_t {
   uint8_t max_clave[3];
-  uint8_t min_clave[3];  // 
+  uint8_t min_clave[3];  //
   uint8_t max_valor[15]; //
   uint8_t min_valor[15]; //
 } __attribute__((__packed__)) maxmin;
