@@ -38,14 +38,14 @@ cropflip_asm:
 	xor R10,R10
 	xor R11,R11
 	xor RBX,RBX
-	mov R10D.[RBP+24];guardo mi offsetx temporal
+	mov R10D,[RBP+24];guardo mi offsetx temporal
 	mov R11D,[RBP+32];guardo mi offsety temporal
 	mov R13D,[RBP+8]; ne guardo mi tamx Cuantas Columnas voy a iterar HINT Son multiplo de 4 este numero
 	mov R12D,[RBP+16]; me guardo mi tamy Cuantas filas voy iterar
-	mul R10D,TAM_PIXEL; AHORA EN R10D TENGO MI DESPLAZAMIENTO EN Columnas
+	;mul R10D,TAM_PIXEL; AHORA EN R10D TENGO MI DESPLAZAMIENTO EN Columnas
 	mov EBX,EDX;me traigo mi tamnio de columna
-	mul EBX, TAM_PIXEL;Columna*4
-	mul R11D,EBX; Ahora tengo en r11d mi primera posicion a donde tengo que copiar es decir offsetFila * columna*4
+	;mul EBX, TAM_PIXEL;Columna*4
+	;mul R11D,EBX; Ahora tengo en r11d mi primera posicion a donde tengo que copiar es decir offsetFila * columna*4
 	add R10D,R11D; Ahora me estoy guardando en r10d mi primera poscion donde tengo q copiar es decir estoy en la primer fila indicada por offsety y en la primer columan indicado por offsetx
 	mov R14D,R10D; Muevo este resultado a R14D
 	mov R10D,[RBP+24];Vuelvo a guardar mi offsetx original
@@ -63,8 +63,8 @@ cropflip_asm:
 
 .cicloColumna:
 	
-	movdqu xmm1, [rdi+bla bla] 
-	movdqu [rsi+algo], [bla bla];revisar como ponerlo al revez jejeje  	
+	;movdqu xmm1, [rdi+bla bla] 
+	;movdqu [rsi+algo], [bla bla];revisar como ponerlo al revez jejeje  	
 	
 	sub R13D,TAM_PIXEL ;le resto lo 4 pixeles q ya procese
 	cmp R13D,0
