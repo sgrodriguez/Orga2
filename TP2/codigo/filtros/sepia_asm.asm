@@ -43,9 +43,9 @@ sepia_asm:
 			;Sumo los valores de R, G y B de los 2 pixeles de XMM1, y distrubuyo esa suma a todos los canales (excepto alpha)
 			movdqu XMM2, XMM1			; XMM2 = [ a1 | r1 | g1 | b1 || a0 | r0 | g0 | b0 ]
 			psrlq XMM2, 16				; XMM2 = [  0 | a1 | r1 | g1 ||  0 | a0 | r0 | g0 ]
-			paddw XMM1, XMM2			; XMM1 = [ a1 |  - |  - | b1 + g1 || a0 |  - |  - | b0 + g0 ]
+			paddusw XMM1, XMM2			; XMM1 = [ a1 |  - |  - | b1 + g1 || a0 |  - |  - | b0 + g0 ]
 			psrlq XMM2, 16				; XMM2 = [  0 |  0 | a1 | r1 ||  0 |  0 | a0 | r0 ]
-			paddw XMM1, XMM2			; XMM1 = [ a1 |  - |  - | b1 + g1 + r1 || a0 |  - |  - | b0 + g0 + r0 ]	** bi + gi + ri = si
+			paddusw XMM1, XMM2			; XMM1 = [ a1 |  - |  - | b1 + g1 + r1 || a0 |  - |  - | b0 + g0 + r0 ]	** bi + gi + ri = si
 			pshuflw XMM1, XMM1, 0xC0	; XMM1 = [ a1 |  - |  - | b1 + g1 + r1 || a0 | s0 | s0 | s0 ]
 			pshufhw XMM1, XMM1, 0xC0	; XMM1 = [ a1 | s1 | s1 | s1 || a0 | s0 | s0 | s0 ]
 
@@ -64,9 +64,9 @@ sepia_asm:
 			;Sumo los valores de R, G y B de los 2 pixeles de XMM0, y distrubuyo esa suma a todos los canales (excepto alpha)
 			movdqu XMM2, XMM0			; XMM2 = [ a3 | r3 | g3 | b3 || a2 | r2 | g2 | b2 ]
 			psrlq XMM2, 16				; XMM2 = [  0 | a3 | r3 | g3 ||  0 | a2 | r2 | g2 ]
-			paddw XMM0, XMM2			; XMM0 = [ a3 |  - |  - | b3 + g3 || a2 |  - |  - | b2 + g2 ]
+			paddusw XMM0, XMM2			; XMM0 = [ a3 |  - |  - | b3 + g3 || a2 |  - |  - | b2 + g2 ]
 			psrlq XMM2, 16				; XMM2 = [  0 |  0 | a3 | r3 ||  0 |  0 | a2 | r2 ]
-			paddw XMM0, XMM2			; XMM0 = [ a3 |  - |  - | b3 + g3 + r3 || a2 |  - |  - | b2 + g2 + r2 ]	** bi + gi + ri = si
+			paddusw XMM0, XMM2			; XMM0 = [ a3 |  - |  - | b3 + g3 + r3 || a2 |  - |  - | b2 + g2 + r2 ]	** bi + gi + ri = si
 			pshuflw XMM0, XMM0, 0xC0	; XMM0 = [ a3 |  - |  - | b3 + g3 + r3 || a2 | s2 | s2 | s2 ]
 			pshufhw XMM0, XMM0, 0xC0	; XMM0 = [ a3 | s3 | s3 | s3 || a2 | s2 | s2 | s2 ]
 

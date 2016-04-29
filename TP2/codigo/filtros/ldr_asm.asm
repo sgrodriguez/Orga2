@@ -2,7 +2,17 @@
 global ldr_asm
 
 section .data
-max: dd 4876875.0	;Float por el cual hay que dividir (max)
+
+max: dd 880	;880 ≅ (1/max) * 2^32
+;La idea de este max es usar division por multiplicacion de enteros y right shifts
+;Si tengo un numero x, y lo quiero dividir por max, puedo hacer:
+;	x * 880 ≅ (x / max) * 2^32
+;	((x / max) * 2^32) >> 32 = (x / max)
+; Entonces: (x * 880) >> 32 ≅ (x / max)
+;La perdida de precision de utilizar este metodo es +-1 en el resultado final:
+	;Tomando X maximo = max * 255 (La multiplicacion de Sumargb * alpha * Identidad)
+	; X / max = 255
+	; (X * 880) / 2**32 ≅ 254.80304611...
 
 ;Mascara que uso para hacer 0 los alpha de todos los pixels dentro de un registro XMM
 shuf_mascara_cero_alpha: db 0x00, 0x01, 0x02, 0xFF, 0x04, 0x05, 0xFF, 0x07, 0x08, 0x09, 0xFF, 0x0B, 0x0C, 0x0E, 0xFF
@@ -46,7 +56,11 @@ ldr_asm:
 	xor R13, R13	;Contador de filas para el calculo de los vecinos
 
 	pxor XMM15, XMM15 ;Lo uso para extender la precision
-	insertps XMM14, [max], 00001110		; XMM14 = [ 0 | 0 | 0 | max ]
+	pinsrd XMM14, [max], 00000000b		; XMM14 = [ 0 | 0 | 0 | max ]
+	pshufd XMM14, XMM14, 00000000b		; XMM13 = [ max | max | max | max ]
+	pinsrd XMM13, [RBP + 16], 00000000b	; XMM13 = [ 0 | 0 | 0 | alpha ]
+	pshufd XMM13, XMM13, 00000000b		; XMM13 = [ alpha | alpha | alpha | alpha ]
+
 	.ciclo_filas:
 		xor R11, R11
 		mov R11D, R10D
@@ -103,8 +117,8 @@ ldr_asm:
 			;Voy a la punta inferior izquierda de la grilla de vecinos
 			mov R12, R11
 			sub R12, 8
-			sub R12, R8D
-			sub R12, R8D
+			sub R12D, R8D
+			sub R12D, R8D
 			;R12 = R11 - 2s - 2
 
 			;Procesando de a 1 pixel
@@ -112,24 +126,25 @@ ldr_asm:
 			xor R13, R13	;Contador
 
 			.ciclo_vecinos:
-				cmp R13, 2 ;Estoy en la fila del medio, por lo que aprovecho y me traigo a XMM10 los pixeles que voy a modificar
-				jne .ciclo_vecinos_continuar
-					;Pongo en XMM10 los 4 pixeles que voy a tener que volver a guardar en memoria:
-					pblendw XMM10, XMM0, 01010000b ; XMM10 = [ p1 | p0 | . | . ]
-					pblendw XMM10, XMM1, 00000101b ; XMM10 = [ p1 | p0 | p3 | p2 ]
-					pshufd XMM10, XMM10, 00011110b ; XMM10 = [ p3 | p2 | p1 | p0 ]
-				.ciclo_vecinos_continuar:
-
 				;Traigo fila
 				movdqu XMM0, [RDI + R12]
 				movdqu XMM1, [RDI + R12 + 16]
 
+
+				cmp R13, 2 ;Estoy en la fila del medio, por lo que aprovecho y me traigo a XMM10 los pixeles que voy a modificar
+				jne .ciclo_vecinos_continuar
+					;Pongo en XMM10 los 4 pixeles que voy a tener que volver a guardar en memoria:
+					pblendw XMM10, XMM0, 11110000b ; XMM10 = [ p1 | p0 | . | . ]
+					pblendw XMM10, XMM1, 00001111b ; XMM10 = [ p1 | p0 | p3 | p2 ]
+					pshufd XMM10, XMM10, 01001110b ; XMM10 = [ p3 | p2 | p1 | p0 ]
+				.ciclo_vecinos_continuar:
+
 				;Hago cero los pixels inutiles
 				pxor XMM6, XMM6					; XMM6 = [ 0  | 0  | 0  | 0  ]
-				pblendw XMM6, XMM0, 00000001b	; XMM6 = [ 0  | 0  | 0  | p4 ]
+				pblendw XMM6, XMM0, 00000011b	; XMM6 = [ 0  | 0  | 0  | p4 ]
 
 				pxor XMM7, XMM7					; XMM7 = [ 0  | 0  | 0  | 0  ]
-				pblendw XMM7, XMM1, 01010101b	; XMM7 = [ p3 | p2 | p1 | p0 ]
+				pblendw XMM7, XMM1, 11111111b	; XMM7 = [ p3 | p2 | p1 | p0 ]
 
 				;Hago la sumaRGB de la fila
 				movdqu XMM8, XMM6				; XMM8 = XMM6
@@ -151,18 +166,81 @@ ldr_asm:
 				psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | a_s | r_s | g_s ]
 				paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  | r_s + g_s | g_s + b_s ]
 				psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | 0   | a_s | r_s ]
-				paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  |  *  | r_s + g_s + b_s ] - Tengo la suma de R,G y B entre si en la word menos significativa
+				paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  |  *  | r_s + g_s + b_s ] - Tengo la suma de R, G y B entre si en la word menos significativa
 
 				;Acumulo en XMM2
-				paddusw XMM2, XMM6
+				paddusw XMM2, XMM6	
 			inc R13
-			add R12, R8D
+			add R12D, R8D
 			cmp R13, 5
 			jl .ciclo_vecinos
-			
-			;Convierto a float el valor de sumargb
 
-			;Necesito ademas el valor de alpha en float y el valor de max, multiplico todo y divido y luego multiplico por la identidad y transformo a entero nuevamente
+			;Necesito multiplicar a cada canal del pixel original por alpha * sumargb, y luego a cada resultado multiplicarlo por max (880) y quedarme con la parte mas significativa del resultado
+
+			; XMM2  = [ * | * | * | * || * | * | * | sumargb ]
+			; XMM13 = [ * | * | * | * || * | * | * | alpha   ]
+			; XMM14 = [ * | * | * | * || * | * | * | max_mul ]
+
+			;1) Multiplico sumargb y alpha
+
+			movdqu XMM11, XMM2				; XMM11 = XMM2
+			pmullw XMM11, XMM13				; XMM11 = [ * | * | * | * || * | * | * | (alpha * sumargb)_low  ]
+			pmulhw XMM2, XMM13				; XMM2  = [ * | * | * | * || * | * | * | (alpha * sumargb)_high ]
+			pslldq XMM2, 2					; XMM2  = [ * | * | * | * || * | * | (alpha * sumargb)_high | 0 ]
+			pblendw XMM2, XMM11, 00000001b	; XMM2 = [ * | * | * | * || * | * | (alpha * sumargb)_high | (alpha * sumargb)_low ]
+											; XMM2 = [ * | * || * | alpha * sumargb ]
+			pshufd XMM2, XMM2, 11000000b	; XMM2 = [ * | alpha * sumargb || alpha * sumargb | alpha * sumargb ]
+
+			;2) Para cada canal del pixel original multiplico por su valor
+			pxor XMM11, XMM11
+			pblendw XMM11, XMM10, 00000011b ; XMM11 = [ 0  | 0  | 0  | p0 ]
+			punpcklbw XMM11, XMM15			; XMM11 = [ 0  | p0 ]
+			punpcklwd XMM11, XMM15			; XMM11 = [ a0 | r0 | g0 | b0 ]
+			movdqu XMM12, XMM11				; XMM12 = XMM11
+
+			pmulld XMM12, XMM2				; XMM12 = [ * | r0 * a * s | g0 * a * s | b0 * a * s ]
+			;Comentarios sobre esta linea:
+			;	a = alpha, s = sumargb
+			;	El resultado de la multiplicacion es a lo sumo el resultado de la multiplicacion con el maximo valor para cada miembro, por lo que es:
+			;		255 * 255 * (3 * 25 * 255) = 1243603125
+			;	El maximo numero que se puede guardar en 32 bits es:
+			;							  2^32 = 4294967296
+			;	Por lo tanto, la parte alta del resultado de XMM12 * XMM2 es 0 para los canales R, G y B
+
+			;								   Objetivo = [ * | ((r0 * a * s) * max_mul)_high || ((g0 * a * s) * max_mul)_high | ((b0 * a * s) * max_mul)_high ]
+			;Multiplico y almaceno los resultados en XMM12 y XMM6
+			movdqu XMM6, XMM12					; XMM6 =  [ * | r0 * a * s | g0 * a * s | b0 * a * s ]
+			psrldq XMM6, 4						; XMM6 =  [ 0 | *		  | r0 * a * s | g0 * a * s ]
+			pmuldq XMM12, XMM14					; XMM12 = [ ((r0 * a * s) * max_mul) || ((b0 * a * s) * max_mul) ]
+			pmuldq XMM6, XMM14					; XMM6 =  [ * | ((g0 * a * s) * max_mul) ]
+
+			;Reordeno
+			pshufd XMM12, XMM12, 00110001b		; XMM12 = [ * | ((r0 * a * s) * max_mul)_high || * | ((b0 * a * s) * max_mul)_high ]
+			pblendw XMM12, XMM6, 00001100b		; XMM12 = [ * | ((r0 * a * s) * max_mul)_high || ((g0 * a * s) * max_mul)_high | ((b0 * a * s) * max_mul)_high ]
+
+
+			;Comentarios sobre esta linea:
+			;	max_mul = 880 = (1 / max) * 2^32
+			;	Al hacer x * max_mul hago:
+			;		x * 880 = x * (1 / max) * 2^32 = (x / max) * 2^32
+			;	Por ultimo, al quedarme solo con la parte alta, estoy haciendo efectivamente un shift de 32 bits a la derecha, que es lo mismo que dividir por 2^32
+			;	Entonces, (x * 880)_high = ((x / max) * 2^32)_high = ((x / max) * 2^32) / 2^32 = (x / max)
+
+			;Aca se puede agregar sumarle 1 a cada canal para redondear
+
+			;Sumo el resultado de la multiplicacion de cada canal al valor original del pixel
+			pblendw XMM12, XMM15, 11000000b ; XMM12 = [ 0 | ((r0 * a * s) * max_mul)_high | ((g0 * a * s) * max_mul)_high | ((b0 * a * s) * max_mul)_high ]
+			packssdw XMM12, XMM15			; XMM12 = [ 0 || p0_ldrizado ]
+			packssdw XMM11, XMM15			; XMM11 = [ 0 || p0 ]	** Cada canal es una Word
+			paddsw XMM11, XMM12				; XMM11 = [ 0 || p0_ldr ]
+			packsswb XMM11, XMM15			; XMM11 = [ 0 | 0 | 0 | p0_ldr ]
+
+			;Muevo el pixel de nuevo a XMM10
+			pblendw XMM10, XMM11, 00000011b ; XMM10 = [ p3 | p2 | p1 | p0_ldr ]
+
+
+			movdqu [RSI + R11], XMM10
+
 
 			;Procesando de a 4 pixels
 
@@ -217,41 +295,3 @@ ldr_asm:
 	pop R12
 	pop RBP
     ret
- 
-;sumar_pixels:
-	;push RBP			;A
-	;mov RBP, RSP
-
-	;Esta funcion toma como parametro dos registros XMM (XMM6 y XMM7) con pixels en precision BYTE, y los usa.
-	;Devuelve en la word menos significativa de XMM6 la suma canal a canal de los pixels
-
-	;pxor XMM15, XMM15
-	
-	; XMM6 = [ p7 | p6 | p5 | p4 ]
-	; XMM7 = [ p3 | p2 | p1 | p0 ]
-
-	;movdqu XMM8, XMM6				; XMM8 = XMM6
-	;punpckhbw XMM8, XMM15 			; XMM8 = [ p7 | p6 ]
-	;punpcklbw XMM6, XMM15			; XMM6 = [ p5 | p4 ]
-
-	;movdqu XMM9, XMM7				; XMM9 = XMM7
-	;punpckhbw XMM9, XMM15 			; XMM9 = [ p3 | p2 ]
-	;punpcklbw XMM7, XMM15			; XMM7 = [ p1 | p0 ]
-
-	;paddusw XMM6, XMM8				; XMM6 = [ p3 + p1 | p0 + p2 ] - Sumados canal a canal
-	;paddusw XMM7, XMM9				; XMM7 = [ p7 + p5 | p6 + p4 ]
-	;paddusw XMM6, XMM7				; XMM6 = [ p3 + p1 + p7 + p5 | p0 + p2 + p6 + p4 ]
-	;movdqu XMM7, XMM6				; XMM7 = XMM6
-	;psrldq XMM7, 64					; XMM7 = [ 0				 | p3 + p1 + p7 + p5 ]
-	;paddusw XMM6, XMM7				; XMM6 = [ *				 | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 ]
-									; XMM6 = [ 64 bits || a_s | r_s | g_s | b_s ]	- Tengo las sumas de A, R, G y B en las 3 words menos significativas
-	;movdqu XMM7, XMM6				; XMM7 = XMM6
-	;psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | a_s | r_s | g_s ]
-	;paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  | r_s + g_s | g_s + b_s ]
-	;psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | 0   | a_s | r_s ]
-	;paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  |  *  | r_s + g_s + b_s ] - Tengo la suma de R,G y B entre si en la word menos significativa
-
-	; XMM6 = [ . | . | . | . | . | . | . | r_s + g_s + b_s ]
-
-	;pop RBP
-	;ret
