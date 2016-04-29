@@ -7,9 +7,6 @@ max: dd 4876875.0	;Float por el cual hay que dividir (max)
 ;Mascara que uso para hacer 0 los alpha de todos los pixels dentro de un registro XMM
 shuf_mascara_cero_alpha: db 0x00, 0x01, 0x02, 0xFF, 0x04, 0x05, 0xFF, 0x07, 0x08, 0x09, 0xFF, 0x0B, 0x0C, 0x0E, 0xFF
 
-;Esta mascara me permite hacer 0 los pixeles que no me interesan de registros XMM para trabajar los vecinos de cierto pixel
-shuf_mascara_offset_pixelsUtiles: db 01010101, 00000001, 01010100, 00000101, 01010000, 00010101, 01000000, 01010101  
-
 section .text
 ;void ldr_asm    (
 	;unsigned char *src,
@@ -46,11 +43,10 @@ ldr_asm:
 
 	xor R12, R12 	;Para hacer calculos para ver cuando estoy en caso borde
 
-	xor R13, R13	;Mascara de offset pixelsUtiles
-
-	mov R13, [shuf_mascara_offset_pixelsUtiles]
+	xor R13, R13	;Contador de filas para el calculo de los vecinos
 
 	pxor XMM15, XMM15 ;Lo uso para extender la precision
+	insertps XMM14, [max], 00001110		; XMM14 = [ 0 | 0 | 0 | max ]
 	.ciclo_filas:
 		xor R11, R11
 		mov R11D, R10D
@@ -93,47 +89,80 @@ ldr_asm:
 			
 			;==============A PARTIR DE ACA TRABAJO CON EL FILTRO LDR REALMENTE==============
 			;Voy a usar R12 para direccionar a las posiciones en las cuales me tengo que traer los paquetes, que son las siguientes: (s = src_row_size)
-			; | R11+2s-2 | R11+2s-1 | R11+2s+0 | R11+2s+1 || R11+2s+2 | R11+2s+3 | R11+2s+4 | R11+2s+5 | => XMM0 || XMM1
-			; | R11+1s-2 | R11+1s-1 | R11+1s+0 | R11+1s+1 || R11+1s+2 | R11+1s+3 | R11+1s+4 | R11+1s+5 | => XMM2 || XMM3
-			; | R11+0s-2 | R11+0s-1 | R11+0s+0 | R11+0s+1 || R11+0s+2 | R11+0s+3 | R11+0s+4 | R11+0s+5 | => XMM4 || XMM5
-			; | R11-1s-2 | R11-1s-1 | R11-1s+0 | R11-1s+1 || R11-1s+2 | R11-1s+3 | R11-1s+4 | R11-1s+5 | => XMM6 || XMM7
-			; | R11-2s-2 | R11-2s-1 | R11-2s+0 | R11-2s+1 || R11-2s+2 | R11-2s+3 | R11-2s+4 | R11-2s+5 | => XMM8 || XMM9
+			; | R11+2s-2 | R11+2s-1 | R11+2s+0 | R11+2s+1 || R11+2s+2 | R11+2s+3 | R11+2s+4 | R11+2s+5 |
+			; | R11+1s-2 | R11+1s-1 | R11+1s+0 | R11+1s+1 || R11+1s+2 | R11+1s+3 | R11+1s+4 | R11+1s+5 |
+			; | R11+0s-2 | R11+0s-1 | R11+0s+0 | R11+0s+1 || R11+0s+2 | R11+0s+3 | R11+0s+4 | R11+0s+5 |
+			; | R11-1s-2 | R11-1s-1 | R11-1s+0 | R11-1s+1 || R11-1s+2 | R11-1s+3 | R11-1s+4 | R11-1s+5 |
+			; | R11-2s-2 | R11-2s-1 | R11-2s+0 | R11-2s+1 || R11-2s+2 | R11-2s+3 | R11-2s+4 | R11-2s+5 |
 
-			;El paquete que voy a procesar son los 4 pixeles que se encuentran a partir de R11+0s+0, con p0 y p1 en la parte mas significativa de XMM4, y p1 y p2 en la menos significativa de XMM5
+			;El paquete que voy a procesar son los 4 pixeles que se encuentran a partir de R11+0s+0, con p0 y p1 en la parte mas significativa de XMM4, y p2 y p3 en la menos significativa de XMM5
 			;Toda esta informacion se trae con 10 copias a registros XMM desde memoria.
 			;Si quisiera procesar 1 pixel, deberia hacer 10 accesos a memoria de todas formas, ya que son 5 lineas de informacion (que estan separadas en memoria), 
 			;	y 5 pixels por linea de informacion, que no entran en un solo registro XMM (20 bytes, registros XMM solo pueden traer 16 bytes).
 
-			;Traigo todos los pixels que necesito para trabajar a los registros como esta especificado al comienzo de esta seccion
+			;Voy a la punta inferior izquierda de la grilla de vecinos
 			mov R12, R11
 			sub R12, 8
-			movdqu XMM4, [RDI + R12]	;R12 = R11-2
-			add R12, 16
-			movdqu XMM5, [RDI + R12]	;R12 = R11+2
-			add R12D, R8D
-			movdqu XMM3, [RDI + R12]	;R12 = R11+1s+2
-			sub R12, 16
-			movdqu XMM2, [RDI + R12]	;R12 = R11+1s-2
-			add R12D, R8D
-			movdqu XMM0, [RDI + R12]	;R12 = R11+2s-2
-			add R12, 16
-			movdqu XMM1, [RDI + R12]	;R12 = R11+2s+2
-			mov R12, R11
-			sub R12, 8
-			sub R12D, R8D
-			movdqu XMM6, [RDI + R12]	;R12 = R11-1s-2
-			add R12, 16
-			movdqu XMM7, [RDI + R12]	;R12 = R11-1s+2
-			sub R12D, R8D
-			movdqu XMM9, [RDI + R12]	;R12 = R11-2s+2
-			sub R12, 16
-			movdqu XMM8, [RDI + R12]	;R12 = R11-2s-2
-
-			;Pongo en XMM10 los 4 pixeles que voy a tener que volver a guardar en memoria:
-			pblendw XMM10, XMM4
+			sub R12, R8D
+			sub R12, R8D
+			;R12 = R11 - 2s - 2
 
 			;Procesando de a 1 pixel
+			pxor XMM2, XMM2 ;Acumulador
+			xor R13, R13	;Contador
+
+			.ciclo_vecinos:
+				cmp R13, 2 ;Estoy en la fila del medio, por lo que aprovecho y me traigo a XMM10 los pixeles que voy a modificar
+				jne .ciclo_vecinos_continuar
+					;Pongo en XMM10 los 4 pixeles que voy a tener que volver a guardar en memoria:
+					pblendw XMM10, XMM0, 01010000b ; XMM10 = [ p1 | p0 | . | . ]
+					pblendw XMM10, XMM1, 00000101b ; XMM10 = [ p1 | p0 | p3 | p2 ]
+					pshufd XMM10, XMM10, 00011110b ; XMM10 = [ p3 | p2 | p1 | p0 ]
+				.ciclo_vecinos_continuar:
+
+				;Traigo fila
+				movdqu XMM0, [RDI + R12]
+				movdqu XMM1, [RDI + R12 + 16]
+
+				;Hago cero los pixels inutiles
+				pxor XMM6, XMM6					; XMM6 = [ 0  | 0  | 0  | 0  ]
+				pblendw XMM6, XMM0, 00000001b	; XMM6 = [ 0  | 0  | 0  | p4 ]
+
+				pxor XMM7, XMM7					; XMM7 = [ 0  | 0  | 0  | 0  ]
+				pblendw XMM7, XMM1, 01010101b	; XMM7 = [ p3 | p2 | p1 | p0 ]
+
+				;Hago la sumaRGB de la fila
+				movdqu XMM8, XMM6				; XMM8 = XMM6
+				punpckhbw XMM8, XMM15 			; XMM8 = [ p7 | p6 ]
+				punpcklbw XMM6, XMM15			; XMM6 = [ p5 | p4 ]
+
+				movdqu XMM9, XMM7				; XMM9 = XMM7
+				punpckhbw XMM9, XMM15 			; XMM9 = [ p3 | p2 ]
+				punpcklbw XMM7, XMM15			; XMM7 = [ p1 | p0 ]
+
+				paddusw XMM6, XMM8				; XMM6 = [ p3 + p1 | p0 + p2 ] - Sumados canal a canal
+				paddusw XMM7, XMM9				; XMM7 = [ p7 + p5 | p6 + p4 ]
+				paddusw XMM6, XMM7				; XMM6 = [ p3 + p1 + p7 + p5 | p0 + p2 + p6 + p4 ]
+				movdqu XMM7, XMM6				; XMM7 = XMM6
+				psrldq XMM7, 64					; XMM7 = [ 0				 | p3 + p1 + p7 + p5 ]
+				paddusw XMM6, XMM7				; XMM6 = [ *				 | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 ]
+												; XMM6 = [ 64 bits || a_s | r_s | g_s | b_s ]	- Tengo las sumas de A, R, G y B en las 3 words menos significativas
+				movdqu XMM7, XMM6				; XMM7 = XMM6
+				psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | a_s | r_s | g_s ]
+				paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  | r_s + g_s | g_s + b_s ]
+				psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | 0   | a_s | r_s ]
+				paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  |  *  | r_s + g_s + b_s ] - Tengo la suma de R,G y B entre si en la word menos significativa
+
+				;Acumulo en XMM2
+				paddusw XMM2, XMM6
+			inc R13
+			add R12, R8D
+			cmp R13, 5
+			jl .ciclo_vecinos
 			
+			;Convierto a float el valor de sumargb
+
+			;Necesito ademas el valor de alpha en float y el valor de max, multiplico todo y divido y luego multiplico por la identidad y transformo a entero nuevamente
 
 			;Procesando de a 4 pixels
 
@@ -189,3 +218,40 @@ ldr_asm:
 	pop RBP
     ret
  
+;sumar_pixels:
+	;push RBP			;A
+	;mov RBP, RSP
+
+	;Esta funcion toma como parametro dos registros XMM (XMM6 y XMM7) con pixels en precision BYTE, y los usa.
+	;Devuelve en la word menos significativa de XMM6 la suma canal a canal de los pixels
+
+	;pxor XMM15, XMM15
+	
+	; XMM6 = [ p7 | p6 | p5 | p4 ]
+	; XMM7 = [ p3 | p2 | p1 | p0 ]
+
+	;movdqu XMM8, XMM6				; XMM8 = XMM6
+	;punpckhbw XMM8, XMM15 			; XMM8 = [ p7 | p6 ]
+	;punpcklbw XMM6, XMM15			; XMM6 = [ p5 | p4 ]
+
+	;movdqu XMM9, XMM7				; XMM9 = XMM7
+	;punpckhbw XMM9, XMM15 			; XMM9 = [ p3 | p2 ]
+	;punpcklbw XMM7, XMM15			; XMM7 = [ p1 | p0 ]
+
+	;paddusw XMM6, XMM8				; XMM6 = [ p3 + p1 | p0 + p2 ] - Sumados canal a canal
+	;paddusw XMM7, XMM9				; XMM7 = [ p7 + p5 | p6 + p4 ]
+	;paddusw XMM6, XMM7				; XMM6 = [ p3 + p1 + p7 + p5 | p0 + p2 + p6 + p4 ]
+	;movdqu XMM7, XMM6				; XMM7 = XMM6
+	;psrldq XMM7, 64					; XMM7 = [ 0				 | p3 + p1 + p7 + p5 ]
+	;paddusw XMM6, XMM7				; XMM6 = [ *				 | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 ]
+									; XMM6 = [ 64 bits || a_s | r_s | g_s | b_s ]	- Tengo las sumas de A, R, G y B en las 3 words menos significativas
+	;movdqu XMM7, XMM6				; XMM7 = XMM6
+	;psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | a_s | r_s | g_s ]
+	;paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  | r_s + g_s | g_s + b_s ]
+	;psrlq XMM7, 16					; XMM7 = [ 64 bits || 0   | 0   | a_s | r_s ]
+	;paddusw XMM6, XMM7				; XMM6 = [ 64 bits || a_s |  *  |  *  | r_s + g_s + b_s ] - Tengo la suma de R,G y B entre si en la word menos significativa
+
+	; XMM6 = [ . | . | . | . | . | . | . | r_s + g_s + b_s ]
+
+	;pop RBP
+	;ret

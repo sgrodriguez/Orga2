@@ -1,1 +1,3 @@
 **/build/
+/TP2/codigo/*.bmp
+/.gitignore~
