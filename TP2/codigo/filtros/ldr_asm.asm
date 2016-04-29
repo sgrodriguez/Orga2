@@ -141,10 +141,10 @@ ldr_asm:
 
 				;Hago cero los pixels inutiles
 				pxor XMM6, XMM6					; XMM6 = [ 0  | 0  | 0  | 0  ]
-				pblendw XMM6, XMM0, 00000011b	; XMM6 = [ 0  | 0  | 0  | p4 ]
+				pblendw XMM6, XMM1, 00000011b	; XMM6 = [ 0  | 0  | 0  | p4 ]
 
 				pxor XMM7, XMM7					; XMM7 = [ 0  | 0  | 0  | 0  ]
-				pblendw XMM7, XMM1, 11111111b	; XMM7 = [ p3 | p2 | p1 | p0 ]
+				pblendw XMM7, XMM0, 11111111b	; XMM7 = [ p3 | p2 | p1 | p0 ]
 
 				;Hago la sumaRGB de la fila
 				movdqu XMM8, XMM6				; XMM8 = XMM6
@@ -155,11 +155,11 @@ ldr_asm:
 				punpckhbw XMM9, XMM15 			; XMM9 = [ p3 | p2 ]
 				punpcklbw XMM7, XMM15			; XMM7 = [ p1 | p0 ]
 
-				paddusw XMM6, XMM8				; XMM6 = [ p3 + p1 | p0 + p2 ] - Sumados canal a canal
-				paddusw XMM7, XMM9				; XMM7 = [ p7 + p5 | p6 + p4 ]
+				paddusw XMM6, XMM8				; XMM6 = [ p7 + p5 | p6 + p4 ] - Sumados canal a canal
+				paddusw XMM7, XMM9				; XMM7 = [ p3 + p1 | p0 + p2 ]
 				paddusw XMM6, XMM7				; XMM6 = [ p3 + p1 + p7 + p5 | p0 + p2 + p6 + p4 ]
 				movdqu XMM7, XMM6				; XMM7 = XMM6
-				psrldq XMM7, 64					; XMM7 = [ 0				 | p3 + p1 + p7 + p5 ]
+				psrldq XMM7, 8					; XMM7 = [ 0				 | p3 + p1 + p7 + p5 ]
 				paddusw XMM6, XMM7				; XMM6 = [ *				 | p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 ]
 												; XMM6 = [ 64 bits || a_s | r_s | g_s | b_s ]	- Tengo las sumas de A, R, G y B en las 3 words menos significativas
 				movdqu XMM7, XMM6				; XMM7 = XMM6
@@ -231,9 +231,9 @@ ldr_asm:
 			;Sumo el resultado de la multiplicacion de cada canal al valor original del pixel
 			pblendw XMM12, XMM15, 11000000b ; XMM12 = [ 0 | ((r0 * a * s) * max_mul)_high | ((g0 * a * s) * max_mul)_high | ((b0 * a * s) * max_mul)_high ]
 			packssdw XMM12, XMM15			; XMM12 = [ 0 || p0_ldrizado ]
-			packssdw XMM11, XMM15			; XMM11 = [ 0 || p0 ]	** Cada canal es una Word
+			packusdw XMM11, XMM15			; XMM11 = [ 0 || p0 ]	** Cada canal es una Word
 			paddsw XMM11, XMM12				; XMM11 = [ 0 || p0_ldr ]
-			packsswb XMM11, XMM15			; XMM11 = [ 0 | 0 | 0 | p0_ldr ]
+			packuswb XMM11, XMM15			; XMM11 = [ 0 | 0 | 0 | p0_ldr ]
 
 			;Muevo el pixel de nuevo a XMM10
 			pblendw XMM10, XMM11, 00000011b ; XMM10 = [ p3 | p2 | p1 | p0_ldr ]
