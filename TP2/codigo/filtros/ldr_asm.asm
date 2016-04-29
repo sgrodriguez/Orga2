@@ -2,6 +2,13 @@
 global ldr_asm
 
 section .data
+max: dd 4876875.0	;Float por el cual hay que dividir (max)
+
+;Mascara que uso para hacer 0 los alpha de todos los pixels dentro de un registro XMM
+shuf_mascara_cero_alpha: db 0x00, 0x01, 0x02, 0xFF, 0x04, 0x05, 0xFF, 0x07, 0x08, 0x09, 0xFF, 0x0B, 0x0C, 0x0E, 0xFF
+
+;Esta mascara me permite hacer 0 los pixeles que no me interesan de registros XMM para trabajar los vecinos de cierto pixel
+shuf_mascara_offset_pixelsUtiles: db 01010101, 00000001, 01010100, 00000101, 01010000, 00010101, 01000000, 01010101  
 
 section .text
 ;void ldr_asm    (
@@ -17,6 +24,8 @@ ldr_asm:
 	push RBP		;A
 	mov RBP, RSP
 	push R12		;D
+	push RBX		;A
+	push R13		;D
 	sub RSP, 8		;A
 
 	;RDI = src
@@ -36,6 +45,10 @@ ldr_asm:
 	mov EBX, EDX
 
 	xor R12, R12 	;Para hacer calculos para ver cuando estoy en caso borde
+
+	xor R13, R13	;Mascara de offset pixelsUtiles
+
+	mov R13, [shuf_mascara_offset_pixelsUtiles]
 
 	pxor XMM15, XMM15 ;Lo uso para extender la precision
 	.ciclo_filas:
@@ -116,11 +129,24 @@ ldr_asm:
 			sub R12, 16
 			movdqu XMM8, [RDI + R12]	;R12 = R11-2s-2
 
+			;Pongo en XMM10 los 4 pixeles que voy a tener que volver a guardar en memoria:
+			pblendw XMM10, XMM4
 
-		;Cuando termino de trabajar con el paquete de pixels de la posicion i, me muevo a la posicion i + 4 (que esta 16 bytes mas adelante)
-		add R11, 16
-		sub EAX, 4
+			;Procesando de a 1 pixel
+			
+
+			;Procesando de a 4 pixels
+
+
+		;Procesando de a 1 pixel
+		add R11, 4
+		sub EAX, 1
 		cmp EAX, 0
+		;Procesando de a 4 pixels
+		;Cuando termino de trabajar con el paquete de pixels de la posicion i, me muevo a la posicion i + 4 (que esta 16 bytes mas adelante)
+		;add R11, 16
+		;sub EAX, 4
+		;cmp EAX, 0
 		jne .ciclo_cols_ldr
 		jmp .ciclo_filas_continuar
 
@@ -155,7 +181,10 @@ ldr_asm:
 	cmp EDX, 0
 	jne .ciclo_filas
 
+	
 	add RSP, 8
+	pop R13
+	pop RBX
 	pop R12
 	pop RBP
     ret
