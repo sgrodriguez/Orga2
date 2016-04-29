@@ -15,8 +15,16 @@ int main (void){
 	uint8_t clave4[3] = {8,9,3};
 	uint8_t valor4[15] = {3,4,5,6,7,8,4,5,63,2,3,4,5,6,5};
 	
-	tdt_agregar(tabla, clave1, valor1);
+	//bloque b1 = {{1,5,3},{3,4,5,6,7,8,4,5,6,2,3,4,5,0,5}};
 	
+	//bloque b2 = {{2,5,2},{3,4,5,3,7,8,4,3,0,2,0,4,5,6,5}};
+	uint8_t valorEntrada1[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	uint8_t valorEntrada2[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	uint8_t valorEntrada3[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	tdt_agregar(tabla, clave1, valor1);
+	tdt_traducir(tabla,clave1,valorEntrada2);
+	tdt_traducir(tabla,clave3,valorEntrada3);
+	tdt_traducir(tabla,clave2,valorEntrada1);
 	
 	tdt_agregar(tabla, clave2, valor2);
 	

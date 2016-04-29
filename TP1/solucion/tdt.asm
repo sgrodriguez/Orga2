@@ -228,22 +228,22 @@ tdt_traducir:
     MOV AL,[R13]
     CMP qword [R10+RAX*TDT_OFFSET_PUNTERO], NULL
     JE .termine
+    MOV R11,[R10+RAX*TDT_OFFSET_PUNTERO]
     INC R13
-    MOV AL,[R13]
-    MOV R11,[R10+RAX*TDT_OFFSET_PUNTERO];Comparo segunda tabla
+    MOV AL,[R13];Comparo segunda tabla
     CMP qword [R11+RAX*TDT_OFFSET_PUNTERO], NULL
     JE .termine
-    MOV rcx,[R11+RAX*TDT_OFFSET_PUNTERO]
+    MOV R11,[R11+RAX*TDT_OFFSET_PUNTERO]
     INC R13
     MOV AL,[R13]
     SHL RAX,1
-    MOV CL,[rcx+RAX*8+15]
+    MOV CL,[R11+RAX*8+15]
     CMP CL ,NULL
     JE .termine
     ;copio el valor a mi puntero valor.
     XOR R10,R10
     MOV R10, NULL
-    lea R11,[rcx+RAX*8];tengo la direccion de mi primer valor
+    lea R11,[R11+RAX*8];tengo la direccion de mi primer valor
 
  .cicloCopiar:
     xor rax,rax; ;uso temporalmente al para almacenar el valor
@@ -254,7 +254,7 @@ tdt_traducir:
     INC R10
     CMP R10, 15
     JE .termine
-    ;JMP .cicloCopiar
+    JMP .cicloCopiar
 
 
   .termine:
@@ -272,7 +272,7 @@ tdt_traducirBloque:
   PUSH RBP
   MOV RBP,RSP
 
-  MOV RDX,[RSI+BLOQUE_VALOR]
+  lea RDX,[RSI+BLOQUE_VALOR]
   CALL tdt_traducir
 
   POP RBP

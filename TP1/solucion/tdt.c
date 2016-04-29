@@ -97,7 +97,7 @@ void tdt_agregar(tdt* tabla, uint8_t* clave, uint8_t* valor){
 
 				if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido == 1){
 
-						printf("QUE HACES PAPA SETEANDO UN VALOR EXISTENTE DENUNCIADO DESPEDITE DE TU TDT\n");
+						//printf("QUE HACES PAPA SETEANDO UN VALOR EXISTENTE DENUNCIADO DESPEDITE DE TU TDT\n");
 						int f=0;
 						while(f < 15) {
 						    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = valor[f];
@@ -126,57 +126,58 @@ void tdt_borrar(tdt* tabla, uint8_t* clave) {
 	if(tabla->primera != NULL){
 		if(tabla->primera->entradas[clave[0]] != NULL){
 
-	if (tabla->primera->entradas[clave[0]]->entradas[clave[1]] !=NULL){
-
-		tabla->cantidad = tabla->cantidad -1;
-		int f=0;
-		while(f < 15) {
-		    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = 0;
-		    f= f+1;
-		}
-		tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 0;
-		int hayAlgo = 0;
-		int i = 0;
-		while(i < 256){
-		   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido == 1);
-		    i = i+1;
-		}
-		if(hayAlgo==0){
-			//BORRAR
-			free(tabla->primera->entradas[clave[0]]->entradas[clave[1]]);
-			tabla->primera->entradas[clave[0]]->entradas[clave[1]] = NULL;
-			i = 0;
-			hayAlgo = 0;
-			while(i<256){
-				hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[i] != NULL);
-				i = i +1;
+	if (tabla->primera->entradas[clave[0]]->entradas[clave[1]] !=NULL){//me falta un if mas si es el val es disitinto de 0
+		if(tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido != 0){
+			tabla->cantidad = tabla->cantidad -1;
+			int f=0;
+			while(f < 15) {
+			    tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valor.val[f] = 0;
+			    f= f+1;
+			}
+			tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[clave[2]].valido = 0;
+			int hayAlgo = 0;
+			int i = 0;
+			while(i < 256){
+			   hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[clave[1]]->entradas[i].valido == 1);
+			    i = i+1;
 			}
 			if(hayAlgo==0){
-				free(tabla->primera->entradas[clave[0]]);
-				tabla->primera->entradas[clave[0]] = NULL;
+				//BORRAR
+				free(tabla->primera->entradas[clave[0]]->entradas[clave[1]]);
+				tabla->primera->entradas[clave[0]]->entradas[clave[1]] = NULL;
 				i = 0;
 				hayAlgo = 0;
-				while(i < 256){
-				    hayAlgo = hayAlgo || (tabla->primera->entradas[i] != NULL);
-				    i = i +1;
+				while(i<256){
+					hayAlgo = hayAlgo || (tabla->primera->entradas[clave[0]]->entradas[i] != NULL);
+					i = i +1;
 				}
-				if(!hayAlgo){
-					free(tabla->primera);
-					tabla->primera = NULL;
+				if(hayAlgo==0){
+					free(tabla->primera->entradas[clave[0]]);
+					tabla->primera->entradas[clave[0]] = NULL;
+					i = 0;
+					hayAlgo = 0;
+					while(i < 256){
+					    hayAlgo = hayAlgo || (tabla->primera->entradas[i] != NULL);
+					    i = i +1;
+					}
+					if(!hayAlgo){
+						free(tabla->primera);
+						tabla->primera = NULL;
+					}
 				}
+
 			}
-
-		}
-
-	}else{
-		printf("Estas Borrando ALGo que no existe\n");
+		} 
+	}
+	else{
+		//printf("Estas Borrando ALGo que no existe\n");
 	}
 
 }else{
-	printf("Estas Borrando ALGo que no existe\n");
+	//printf("Estas Borrando ALGo que no existe\n");
 }
 	}else{
-		printf("Estas Borrando ALGo que no existe\n");
+		//printf("Estas Borrando ALGo que no existe\n");
 	}
 
 }
