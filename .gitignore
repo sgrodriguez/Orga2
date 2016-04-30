@@ -1,3 +1,4 @@
 **/build/
 /TP2/codigo/*.bmp
+/TP2/codigo/experimentos/*.bmp
 /.gitignore~
