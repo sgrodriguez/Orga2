@@ -79,7 +79,7 @@ cropflip_asm:
 	;RECALCULO R14 RESETEO MI TAMX osea mi fila y le resto 1 a mi offsety
 
 	xor r15,r15
-	mov R13D,[RBP+24];reseteo mi tamx
+	mov R13D,[RBP+16];reseteo mi tamx
 	mov eax,r11d
 	mov ebx,ecx
 
