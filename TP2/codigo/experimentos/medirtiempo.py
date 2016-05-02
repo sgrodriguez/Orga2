@@ -5,6 +5,10 @@ import time
 #import statistics
 import os
 
+import numpy
+def median(lst):
+    return numpy.median(numpy.array(lst))
+
 #process = subprocess.Popen(["make clean; make;"], shell=True, stdout=subprocess.PIPE, cwd="../")
 
 #process.wait()
@@ -24,10 +28,12 @@ for i in range(iterar):
 	#print( end-start )
 	caca.append(end-start)
 
-#print ( statistics.median(caca) )
-caca.sort()
-iterar = iterar/2
-print(caca[iterar])#mediana
+print ( median(caca) )
+#caca.sort()
+#iterar = iterar/2
+#print(caca[iterar])#mediana
+
+
 os.remove("outputFile")
 
 #-v sepia -i asm ../tests/data/img/lena.1920x1080.bmp 100

@@ -412,7 +412,6 @@ ldr_asm:
 	dec EDX
 	cmp EDX, 0
 	jne .ciclo_filas
-
 	
 	pop R14
 	pop R13

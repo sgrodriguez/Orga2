@@ -109,6 +109,9 @@ cropflip_asm:
 
 .termineCopiar:
 
+;	clflush [rsi]
+;	clflush [rdi]
+
 	sub rsp,8
 	pop r15
 	pop rcx
@@ -118,5 +121,6 @@ cropflip_asm:
 	pop R14
 	pop R12
 	pop RBP
+
 	ret
     
