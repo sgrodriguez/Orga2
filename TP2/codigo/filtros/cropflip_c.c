@@ -21,22 +21,11 @@ void cropflip_c    (
 	int i = 0;
 	int j;
 
-	if ((cols - offsetx) < tamx){
-		tamx = cols - offsetx; 
-	}
-
-
-	if ((filas - offsety) < tamy){
-		tamy = filas - offsety; 
-	}
-
-
-
 	while(i < tamy){
 		j = 0;
 		while(j < tamx){ 
 	
-			bgra_t *p_d = (bgra_t*)&dst_matrix[tamy-i][(tamx-j) * 4]; //PARA DARLOS VUELTA
+			bgra_t *p_d = (bgra_t*)&dst_matrix[tamy-i-1][j * 4]; //PARA DARLOS VUELTA
             bgra_t *p_s = (bgra_t*)&src_matrix[offsety+i][(offsetx+j) * 4];
 
 			p_d->b = p_s->b;

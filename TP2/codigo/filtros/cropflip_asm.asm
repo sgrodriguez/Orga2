@@ -24,20 +24,21 @@ cropflip_asm:
 	;RBP + 32 = offsetx (entero)
 	;RBP + 40 = offsety (entero)
 
-	push RBP		
+	push RBP
 	mov RBP, RSP; Creando mi stack peolona
 	push R12
-	push R13
 	push R14
 	push RBX
-	push rcx
 	push r11
-	push r12
 	push r13
-
+	push rcx
+	push r15
+	add rsp,8
+	;corregir stack
 
 
 	xor rax,rax
+	xor r15,r15
 	xor rcx,rcx
 	xor R12,R12;	Me guardo mi poss Actual de columna => empieza con (offsetFila + OffsetColumna)*4
 	xor R13,R13;	
@@ -54,8 +55,18 @@ cropflip_asm:
 	shl RBX,2; en RBX tengo columna *4
 	mov R10D,[RBP+32];Vuelvo a guardar mi offsetx original
 	mov R11D,[RBP+40];Vuelvo a guardar mi offsety original
-	mov ecx,[RBP+40];Vuelvo a guardar mi offsety original
-	
+	mov eax,r12d
+	dec eax
+	mul r9d
+	mov ecx,eax;aca tengo mi primera fila destino a la que voy a copiar los pixeles
+	xor rax,rax
+	mov eax,r11d
+	mul ebx
+	mov r11d,eax; tengo mi primera fila a la cual quiero copiar
+	xor rax,rax
+	xor rbx,rbx
+	shl R10,2; AHORA EN R10 TENGO MI DESPLAZAMIENTO EN Columnas
+	add r11,r10
 
 	;eax tengo mi multiplicando y dsp multiplico por un registro
 	;
@@ -64,50 +75,47 @@ cropflip_asm:
 	CMP R12D,0
 	je .termineCopiar
 
-	;./tp2 -v cropflip -i asm lena32.bmp 32 32 128 128
+	;./tp2 -v cropflip -i asm lena32.bmp 256 256 128 0
 	;RECALCULO R14 RESETEO MI TAMX osea mi fila y le resto 1 a mi offsety
 
-	shl R10,2; AHORA EN R10 TENGO MI DESPLAZAMIENTO EN Columnas
-	
-	mov eax,ecx
-	mul ebx
-	mov r11d,eax
+	xor r15,r15
 	mov R13D,[RBP+24];reseteo mi tamx
+	mov eax,r11d
+	mov ebx,ecx
 
 	jmp .cicloColumna
 
 .cicloColumna:
 	;cuando entro a este ciclo debo asegurar que en r11 este mi offsetfila(actualizado)*columna*4
 	;y en r10 debo tener mi offset x actualizado es decir r10 * tam_pixel
-	add r11,r10
-	movdqu xmm1, [rdi+r11+16];
+	movdqu xmm1, [rdi+rax];
 	;TENGO Q PONER UN OFFSET PARA IR PONIENDO LOS PIXEL EN LA IMAGEN DESTINO 
-	movdqu [rsi], xmm1;revisar como ponerlo al revez jejeje  	;PENSAR COMO CARAJO PONERLO
-	
-	shr R10,2
-	add R10,1
-	shl r10,2;ahora actualizo mi offsetx
+	add ebx,r15d
+	movdqu [rsi+rbx], xmm1;revisar como ponerlo al revez jejeje  	;PENSAR COMO CARAJO PONERLO
+	sub ebx,r15d
+
+	add eax,16
 
 	sub R13D,TAM_PIXEL ;le resto lo 4 pixeles q ya procese
+	add r15d,16
 	cmp R13D,0
 	jne .cicloColumna
-	xor r10,r10
-	mov R10D,[RBP+32];Vuelvo a guardar mi offsetx original
+	;Salgo del ciclo
 
-	;DEBO RESTAR O SUMAR 1 A MI OFFSET Y EN ESTA PARTDE DEL CICLO?
-	add ecx,1;le sumo a mi offsety 1
-	sub r12d,1;le resto a mi tamy 1
+	add r11d,r8d
+	sub ecx,r9d;le resto dst_row size para que me baje a la siguiente fila
+	dec r12d;le resto a mi tamy 1
 	jmp .cicloFilas
 
 .termineCopiar:
 
-	pop r13
-	pop r12
-	pop r11
+	sub rsp,8
+	pop r15
 	pop rcx
+	pop r13
+	pop r11
 	pop RBX
 	pop R14
-	pop R13
 	pop R12
 	pop RBP
 	ret
