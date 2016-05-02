@@ -2,3 +2,6 @@
 /TP2/codigo/*.bmp
 /TP2/codigo/experimentos/*.bmp
 /.gitignore~
+**/*.pyc
+**/imagenes_a_testear/
+**/tests/.nfs*
