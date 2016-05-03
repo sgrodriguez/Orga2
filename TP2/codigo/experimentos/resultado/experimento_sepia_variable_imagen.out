@@ -1,0 +1,146 @@
+Filtro Sepia.
+Experimento variando el size de la imagen por potencias de 2.
+
+
+Implementacion de Sepia en c
+Imagen: 16x16
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.16x16.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 14195.520
+
+
+Imagen: 32x32
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.32x32.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 57780.824
+
+
+Imagen: 64x64
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.64x64.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 241122.438
+
+
+Imagen: 128x128
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.128x128.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 914194.562
+
+
+Imagen: 256x256
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.256x256.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 3905395.250
+
+
+Imagen: 512x512
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.512x512.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 14700099.000
+
+
+Imagen: 1024x1024
+Procesando...
+  Filtro             : sepia
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.1024x1024.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 58419148.000
+
+
+Implementacion de Sepia en asm
+Imagen: 16x16
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.16x16.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 1317.180
+
+
+Imagen: 32x32
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.32x32.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 5161.060
+
+
+Imagen: 64x64
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.64x64.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 18419.217
+
+
+Imagen: 128x128
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.128x128.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 74179.719
+
+
+Imagen: 256x256
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.256x256.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 297820.312
+
+
+Imagen: 512x512
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.512x512.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 1168650.625
+
+
+Imagen: 1024x1024
+Procesando...
+  Filtro             : sepia
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.1024x1024.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 4694107.000
+
+

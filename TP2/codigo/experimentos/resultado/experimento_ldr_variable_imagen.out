@@ -1,0 +1,146 @@
+Filtro LDR.
+Experimento variando el size de la imagen por potencias de 2.
+
+
+Implementacion de LDR en c
+Imagen: 16x16
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.16x16.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 52707.156
+
+
+Imagen: 32x32
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.32x32.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 279201.156
+
+
+Imagen: 64x64
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.64x64.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 1262535.000
+
+
+Imagen: 128x128
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.128x128.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 5404114.000
+
+
+Imagen: 256x256
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.256x256.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 22213366.000
+
+
+Imagen: 512x512
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.512x512.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 90118368.000
+
+
+Imagen: 1024x1024
+Procesando...
+  Filtro             : ldr
+  Implementación     : C
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.1024x1024.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 363167040.000
+
+
+Implementacion de LDR en asm
+Imagen: 16x16
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.16x16.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 13202.500
+
+
+Imagen: 32x32
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.32x32.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 70270.273
+
+
+Imagen: 64x64
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.64x64.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 320903.344
+
+
+Imagen: 128x128
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.128x128.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 1367428.250
+
+
+Imagen: 256x256
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.256x256.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 5676207.000
+
+
+Imagen: 512x512
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.512x512.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 22949422.000
+
+
+Imagen: 1024x1024
+Procesando...
+  Filtro             : ldr
+  Implementación     : ASM
+  Archivo de entrada : ../tests/data/imagenes_a_testear/lena.1024x1024.bmp
+Tiempo de ejecución:
+Valores obtenidos descartando outliers:
+Promedio: 92742256.000
+
+
