@@ -157,8 +157,8 @@ void imprimir_tiempos_ejecucion_con_protocolo(unsigned long long int* tiempos, i
 
 	printf("Tiempo de ejecución:\n");
 	printf("Valores obtenidos descartando outliers:\n");
-	for (int i = 0; i < cant_iteraciones - outliers; i++)
-		printf("%llu\n", tiempos[i]);
+	//for (int i = 0; i < cant_iteraciones - outliers; i++)
+	//	printf("%llu\n", tiempos[i]);
 	printf("Promedio: %.3f\n", (float)sum/(float)(cant_iteraciones-outliers));
 
 }
