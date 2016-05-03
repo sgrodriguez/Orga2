@@ -6,3 +6,4 @@
 **/imagenes_a_testear/
 **/tests/.nfs*
 **/*.out
+**/resultados_*/
