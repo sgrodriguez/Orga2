@@ -1,4 +1,5 @@
-#Se le pasa como parametro la cantidad de iteraciones y el modelo de imagen.
+#Se le pasa como parametro el alpha, la cantidad de iteraciones y el modelo de imagen.
+#experimento.py ALPHA ITERACIONES MODELO
 #0 = multiplos de 4
 #1 = potencias de 2
 #2 = resoluciones
@@ -15,13 +16,15 @@ def purge(dir, pattern):
     	if re.search(pattern, f):
     		os.remove(os.path.join(dir, f))
 
-args = ["../build/tp2", "sepia", "-i", "implementacion", "-t", "iteraciones", "img"]
+args = ["../build/tp2", "ldr", "-i", "implementacion", "-t", "iteraciones", "img", "alpha"]
 
 arg_img = 6
 arg_iter = 5
 arg_implementacion = 3
 
-args[arg_iter] = argv[1]
+args[-1] = argv[1]
+
+args[arg_iter] = argv[2]
 
 implementaciones = ["c", "asm"]
 
@@ -34,28 +37,28 @@ sizes_aumenta_ancho=['128x128', '256x128', '512x128', '1024x128']
 sizes_aumenta_alto=['128x128', '128x256', '128x512', '128x1024']
 imgs = []
 
-if (len(argv) == 2):
+if (len(argv) == 3):
 	imgs = sizes_pot2
-elif (int(argv[2]) == 0):
+elif (int(argv[3]) == 0):
 	imgs = sizes_mult4
-elif (int(argv[2]) == 1):
+elif (int(argv[3]) == 1):
 	imgs = sizes_pot2
-elif (int(argv[2]) == 2):
+elif (int(argv[3]) == 2):
 	imgs = sizes_res
-elif (int(argv[2]) == 3):
+elif (int(argv[3]) == 3):
 	imgs = sizes_aumenta_ancho
-elif (int(argv[2]) == 4):
+elif (int(argv[3]) == 4):
 	imgs = sizes_aumenta_alto
 
-res_file = "./resultado/experimento_sepia_variable_imagen.out"
+res_file = "./resultado/experimento_ldr_variable_imagen.out"
 
 f = open(res_file,"w+")
 
-print >> f, 'Filtro Sepia.\nExperimento variando el size de la imagen por potencias de 2.\n\n'
+print >> f, 'Filtro LDR.\nExperimento variando el size de la imagen por potencias de 2.\n\n'
 
 for imp in implementaciones:
 	args[arg_implementacion] = imp;
-	print >> f, "Implementacion de Sepia en", imp
+	print >> f, "Implementacion de LDR en", imp
 	for img in imgs:
 		print >> f, "Imagen:", img
 		f.flush()
